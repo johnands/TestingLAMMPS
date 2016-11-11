@@ -1,0 +1,134 @@
+### initialization ###
+
+# sigma, epsilon, mass, boltzmann constant = 1
+units 		lj	
+	
+dimension 	3
+
+# periodic boundary conditions on all edges
+boundary	p p p		
+
+# for liquids, metals, coarse-grained materials
+atom_style	atomic		
+
+# initial temperature
+variable	temp equal 100/119.735
+
+
+
+### create geometry ###
+
+# number of unit cells
+variable	Nc equal 8
+
+# lattice constant in lj-units. 5.260: solid argon
+variable	lc equal 1.08506
+print "lc = ${lc}"
+
+variable	end equal ${lc}*${Nc}
+
+# create lattice with specified lattice constant
+lattice 	fcc ${lc}
+
+# create region of simulation box
+# style block is a regular box	
+region 		myRegion block 0 ${Nc} 0 ${Nc} 0 ${Nc} units lattice
+
+# create box, 1 is number of atom types in this box
+create_box	1 myRegion
+
+# fill lattice with atoms of type (user-specified) 1
+# style box fills the entire simulation box with particles on the lattice
+create_atoms	1 box
+
+# mass of atom type 1
+mass		1 1.0
+ 
+# gaussian distributed velocities so that temperature is 3.0
+# 87287 is a seed
+# mom yes: zeroed linear momentum
+velocity	all create ${temp} 87287 mom yes dist gaussian
+
+
+
+### computes ###
+
+# displacement for diffusion
+compute displacement all displace/atom
+
+# radial distribution function for all atoms with 50 bins
+compute radialDist all rdf 50
+
+
+
+### potential ###
+
+# specify type of pair-wise potential
+# LJ-potential with cut-off 2.5
+pair_style	lj/cut 2.5
+
+# set coeff. in LJ-potential:
+# atomtype1 - atomtype2 - epsilon - sigma - cutoff1 - (cutoff2)
+pair_coeff	1 1 1.0 1.0 2.5
+
+
+
+### neighbour lists ###
+
+# set neighbour cut-off. Style bin is the fastest for "normal" systems
+# 0.3 is called the skin size
+neighbor	0.5 bin
+
+# update neighbour lists every 20 time steps
+# don't check if any atoms has moved more than half the skin size
+neigh_modify	every 20 delay 0 check no
+
+
+
+### integration ###
+
+# set time step
+timestep 0.01
+
+# set integrator
+run_style verlet
+
+# a fix is computed every time step
+# 1: user-assigned ID, all: group of atoms
+# nve: microcanonical integration to update positions and velocities
+fix		integration all nve
+
+# thermostat
+#fix berendsen all temp/berendsen ${temp} ${temp} 10.0
+
+
+### output ###
+
+# print thermodynamic properties every 50 time steps
+thermo		50
+thermo_style custom step temp density press ke pe etotal 
+thermo_modify norm yes
+
+#dump stateFile all custom 10 argon.xyz id x y z vx vy vz
+
+# write displacement to file, include periodic b.c. effects
+#dump diffusion all custom 100 Data/diffusion*.dat c_displacement[4]
+
+# compute time averaged rdf every 100 time steps
+# 100 1 100: Nevery - Nrepeat - Nfreq means we calculate the time average for step multiples of Nfreq
+# but Nrepeat 1 means that we don't average over preceding steps
+# mode vector: input is a vector
+#fix radial all ave/time 100 10 1000 c_radialDist[*] file Data/radialDist.dat mode vector
+
+# run for specified number of steps
+run		1000
+
+
+
+
+
+
+
+
+
+

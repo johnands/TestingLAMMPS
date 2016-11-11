@@ -1,0 +1,171 @@
+### initialization ###
+
+# sigma, epsilon, mass, boltzmann constant = 1
+units 		lj	
+	
+dimension 	3
+
+# periodic boundary conditions on all edges
+boundary	p p p		
+
+# for liquids, metals, coarse-grained materials
+atom_style	atomic		
+
+# initial temperature
+variable	temp equal 0.851
+
+
+
+### create geometry ###
+
+# number of unit cells
+variable	Nc equal 20
+
+# lattice constant in lj-units. 5.720: liquid argon
+variable	lc equal 0.843768
+
+# create lattice with specified lattice constant
+lattice 	fcc ${lc}
+
+# create region of simulation box
+# style block is a regular box	
+region myRegion block 0 ${Nc} 0 ${Nc} 0 ${Nc} units lattice
+
+# create box, 1 is number of atom types in this box
+create_box 1 myRegion
+
+# fill lattice with atoms of type (user-specified) 1
+# style box fills the entire simulation box with particles on the lattice
+create_atoms	1 box
+
+# mass of atom type 1
+mass		1 1.0
+ 
+# gaussian distributed velocities so that temperature is 3.0
+# 87287 is a seed
+# mom yes: zeroed linear momentum
+velocity	all create ${temp} 87287 mom yes dist gaussian
+
+
+
+### computes ###
+
+# displacement for diffusion
+compute displacement all displace/atom
+
+# radial distribution function for all atoms with 50 bins
+compute radialDist all rdf 50
+
+
+
+### potential ###
+
+# specify type of pair-wise potential
+# LJ-potential with cut-off 2.5
+pair_style	lj/cut 2.5
+
+# set coeff. in LJ-potential:
+# atomtype1 - atomtype2 - epsilon - sigma - cutoff1 - (cutoff2)
+pair_coeff	1 1 1.0 1.0 2.5
+
+
+
+### neighbour lists ###
+
+# set neighbour cut-off. Style bin is the fastest for "normal" systems
+# 0.3 is called the skin size
+neighbor	0.5 bin
+
+# update neighbour lists every 20 time steps
+# don't check if any atoms has moved more than half the skin size
+neigh_modify	every 20 delay 0 check no
+
+
+
+### integration ###
+
+# set time step
+timestep 0.01
+
+# set integrator
+run_style verlet
+
+# a fix is computed every time step
+# 1: user-assigned ID, all: group of atoms
+# nve: microcanonical integration to update positions and velocities
+fix		integration all nve
+
+# thermostat
+fix berendsen all temp/berendsen ${temp} ${temp} 10.0
+
+
+### output ###
+
+# print thermodynamic properties every 50 time steps
+thermo		50
+thermo_style custom step temp density press ke pe etotal 
+thermo_modify norm yes
+
+#dump stateFile all custom 10 argon.xyz id x y z vx vy vz
+
+# write displacement to file, include periodic b.c. effects
+#dump diffusion all custom 100 Data/diffusion*.dat c_displacement[4]
+
+# compute time averaged rdf every 100 time steps
+# 100 1 100: Nevery - Nrepeat - Nfreq means we calculate the time average for step multiples of Nfreq
+# but Nrepeat 1 means that we don't average over preceding steps
+# mode vector: input is a vector
+#fix radial all ave/time 100 10 1000 c_radialDist[*] file Data/radialDist.dat mode vector
+
+# run for specified number of steps
+run	500
+
+
+
+### generate nanoporous system ###
+
+# make a centered cylinder 
+#variable halfSize equal 33.5977/2.0
+#region centeredCylinder cylinder x ${halfSize} ${halfSize} 5.87 EDGE EDGE units box
+
+# make random spheres
+
+# random randius between 2 and 3 nm
+variable radius equal random(5.87,8.81,1234)
+
+# random centers
+variable x equal random(0,36,3487)
+variable y equal random(0,36,2384)
+variable z equal random(0,36,2525)
+
+# loop to make 20 overlapping spheres
+label       loop				# define label	
+variable    a loop 20			# define loop variable: 1-20
+if "$a < 21" then "region $a sphere $x $y $z ${radius}" 
+next        a					# update a
+jump        in.nanoPorous loop	# next iteration
+
+# delete loop variable
+variable    a delete
+
+region pores union 20 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 side out
+region matrix union 20 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 side in
+
+# define group and new integration
+#group moving region centeredCylinder
+group moving region pores
+group nonMoving region matrix
+unfix integration
+fix integration2 moving nve
+
+#dump stateFile all custom 10 Data/spheres.xyz id x y z vx vy vz
+#dump positions1 moving atom 10 Data/nanoSpheresPores.lammpstrj
+#dump positions2 nonMoving atom 10 Data/nanoSpheresMatrix.lammpstrj
+
+run 1000
+
+
+
+
+
+
