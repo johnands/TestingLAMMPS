@@ -121,7 +121,7 @@ thermo_modify norm yes
 #fix radial all ave/time 100 10 1000 c_radialDist[*] file Data/radialDist.dat mode vector
 
 # run for specified number of steps
-run		1000
+run		501
 
 
 
