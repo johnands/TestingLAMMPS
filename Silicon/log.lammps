@@ -1,0 +1,22 @@
+LAMMPS (17 Jan 2017)
+units       lj
+atom_style  atomic
+atom_modify map hash
+lattice     fcc 0.8442
+Lattice spacing in x,y,z = 1.6796 1.6796 1.6796
+variable L equal 4
+region box block 0 $L 0 $L 0 $L
+region box block 0 4 0 $L 0 $L
+region box block 0 4 0 4 0 $L
+region box block 0 4 0 4 0 4
+create_box  1 box
+Created orthogonal box = (0 0 0) to (6.71838 6.71838 6.71838)
+  1 by 1 by 1 MPI processor grid
+create_atoms    1 box
+Created 256 atoms
+mass        1 1.0
+velocity    all create 2.0 87287 loop geom
+pair_style  nn 2.5
+pair_coeff  "../../TensorFlow/saveNetwork.txt"
+ERROR: Incorrect args for pair coefficients (../pair_nn.cpp:229)
+Last command: pair_coeff  "../../TensorFlow/saveNetwork.txt"

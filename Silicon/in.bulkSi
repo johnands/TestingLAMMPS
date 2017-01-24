@@ -1,0 +1,42 @@
+# bulk Si via Stillinger-Weber
+# test minimum distance that Si atoms can have in bulk Si
+
+units			metal
+atom_style		atomic
+
+# tetrahedral structure: diamond
+# 5.431 is lattice constant in Angstrom
+lattice			diamond 5.431
+region			box block 0 20 0 20 0 10
+create_box		1 box
+create_atoms	1 box
+
+# Stillinger-Weber
+pair_style		sw
+pair_coeff		* * Si.sw Si
+# mass in grams/mole -> atom number
+mass            1 28.06
+
+velocity		all create 3000.0 376847 loop geom
+
+neighbor		1.0 bin
+neigh_modify    delay 5 every 1
+
+fix				1 all nve
+
+timestep		0.001
+
+# pair-wise distance, this is a local compute
+compute pairDist all pair/local dist
+
+# minimum pair-wise distance, this is a global copute
+compute minDist all reduce min c_pairDist
+compute avDist all reduce ave c_pairDist
+
+# local computes like pair/local can be dumped with dump local
+# per-atom computes can be dumped with dump custom
+# global computes like minDist must be dumped with thermo custom
+thermo 10
+thermo_style custom step temp etotal c_minDist c_avDist
+
+run 100
