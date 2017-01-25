@@ -7,7 +7,7 @@ atom_style		atomic
 # tetrahedral structure: diamond
 # 5.431 is lattice constant in Angstrom
 lattice			diamond 5.431
-region			box block 0 20 0 20 0 10
+region			box block 0 5 0 5 0 5
 create_box		1 box
 create_atoms	1 box
 
@@ -17,7 +17,7 @@ pair_coeff		* * Si.sw Si
 # mass in grams/mole -> atom number
 mass            1 28.06
 
-velocity		all create 3000.0 376847 loop geom
+velocity		all create 1000.0 376847 loop geom
 
 neighbor		1.0 bin
 neigh_modify    delay 5 every 1
@@ -29,14 +29,35 @@ timestep		0.001
 # pair-wise distance, this is a local compute
 compute pairDist all pair/local dist
 
-# minimum pair-wise distance, this is a global copute
+# number of neighbours for each atom
+compute neighbours all coord/atom cutoff 3.77
+
+# minimum, max and average pair-wise distance, this is a global compute
 compute minDist all reduce min c_pairDist
 compute avDist all reduce ave c_pairDist
+compute maxDist all reduce max c_pairDist
+
+# compute 
+compute maxNeigh all reduce max c_neighbours
+compute minNeigh all reduce min c_neighbours
+compute aveNeigh all reduce ave c_neighbours
 
 # local computes like pair/local can be dumped with dump local
 # per-atom computes can be dumped with dump custom
 # global computes like minDist must be dumped with thermo custom
-thermo 10
-thermo_style custom step temp etotal c_minDist c_avDist
+thermo 100
+thermo_style custom step temp etotal 
 
-run 100
+# thermalize
+run 1000
+
+# new thermo dump
+thermo_style custom step temp etotal c_minDist c_avDist c_maxDist c_maxNeigh c_minNeigh c_aveNeigh
+
+# dump positions for use in training
+dump stateFile all custom 100 Data/Si*.xyz x y z
+
+# run again
+run 1000
+
+
