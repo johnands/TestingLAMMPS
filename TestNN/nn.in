@@ -9,8 +9,8 @@ create_box	1 box
 create_atoms 1 box
 mass 1 28.08
 
-pair_style nn
-pair_coeff * * networkLJMetal.txt 8.5125
+pair_style nn/manybody
+pair_coeff * * ../../TensorFlow/TrainingData/13.02-19.06.31 8.5125
 
 velocity all create 300.0 376847 
 #loop geom
