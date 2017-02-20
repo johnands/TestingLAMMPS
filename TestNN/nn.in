@@ -9,8 +9,8 @@ create_box	1 box
 create_atoms 1 box
 mass 1 28.08
 
-pair_style nn/manybody
-pair_coeff * * ../../TensorFlow/TrainingData/13.02-19.06.31 8.5125
+pair_style nn/angular
+pair_coeff * * ../../TensorFlow/TrainingData/20.02-16.36.28 8.5125
 
 velocity all create 300.0 376847 
 #loop geom
@@ -27,7 +27,7 @@ fix 1 all nve
 
 neighbor	1.0 bin
 
-thermo 20
+thermo 1
 thermo_style custom step temp etotal pe ke press cpuremain
 thermo_modify norm yes
 

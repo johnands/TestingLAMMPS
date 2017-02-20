@@ -12,9 +12,9 @@ region			box block 0 ${L} 0 ${L} 0 ${L}
 create_box		1 box
 create_atoms	1 box
 
-# Stillinger-Weber
-pair_style		sw
-pair_coeff		* * Si.sw Si #neighbours.txt
+# Neural network
+pair_style		nn/angular
+pair_coeff		* * ../../TensorFlow/TrainingData/20.02-16.36.28 3.77118
 
 # mass in grams/mole -> atom number
 mass            1 28.06
