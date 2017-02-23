@@ -12,9 +12,9 @@ region			box block 0 ${L} 0 ${L} 0 ${L}
 create_box		1 box
 create_atoms	1 box
 
-# Neural network
-pair_style		nn/angular
-pair_coeff		* * ../../TensorFlow/TrainingData/20.02-16.36.28 3.77118
+# Stillinger-Weber
+pair_style		sw
+pair_coeff		* * Si.sw Si neighbours.txt
 
 # mass in grams/mole -> atom number
 mass            1 28.06
@@ -43,15 +43,28 @@ timestep		0.001
 #compute minNeigh all reduce min c_neighbours
 #compute aveNeigh all reduce ave c_neighbours
 
-#compute peAtom all pe/atom
-#compute avePe all reduce ave c_peAtom
+compute peAtom all pe/atom
+compute avePe all reduce ave c_peAtom
+
+# compute radial distribution with 50 bins
+#compute radialDist all rdf 50
+
+# compute time-averaged rdf
+# Nevery Nrepeat Nfreq
+# Nevery: space between each step contributing to final average
+# Nrepeat: number of steps contributing to final average
+# Nfreq: compute final average every Nfreq time steps
+# eg 2 6 100 means calculating final average every 100 time steps
+# and the steps contributing to the average is 90, 92, 94, 96, 98, 100
+#fix radial all ave/time 100 10 1000 c_radialDist[*] file Data/radialDist.dat mode vector
 
 # local computes like pair/local can be dumped with dump local
 # per-atom computes can be dumped with dump custom
 # global computes like minDist must be dumped with thermo custom
-thermo_style custom step temp pe #c_avePe
-thermo 200
+thermo_style custom step temp ke pe c_avePe
+thermo 1
 thermo_modify norm yes
+
 
 # new thermo dump
 #thermo_style custom step temp etotal c_minDist c_avDist c_maxDist c_maxNeigh c_minNeigh c_aveNeigh
