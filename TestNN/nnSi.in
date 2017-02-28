@@ -50,7 +50,7 @@ timestep		0.001
 # per-atom computes can be dumped with dump custom
 # global computes like minDist must be dumped with thermo custom
 thermo_style custom step temp pe #c_avePe
-thermo 200
+thermo 1
 thermo_modify norm yes
 
 # new thermo dump
