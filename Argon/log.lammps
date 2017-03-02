@@ -1,0 +1,195 @@
+LAMMPS (30 Jul 2016)
+### initialization ###
+
+# sigma, epsilon, mass, boltzmann constant = 1
+units 		lj
+
+dimension 	3
+
+# periodic boundary conditions on all edges
+boundary	p p p
+
+# for liquids, metals, coarse-grained materials
+atom_style	atomic
+
+# initial temperature
+variable	temp equal 100/119.735
+
+
+
+### create geometry ###
+
+# number of unit cells
+variable	Nc equal 8
+
+# lattice constant in lj-units. 5.260: solid argon
+variable	lc equal 1.08506
+print "lc = ${lc}"
+lc = 1.08506
+
+variable	end equal ${lc}*${Nc}
+variable	end equal 1.08506*${Nc}
+variable	end equal 1.08506*8
+
+# create lattice with specified lattice constant
+lattice 	fcc ${lc}
+lattice 	fcc 1.08506
+Lattice spacing in x,y,z = 1.54479 1.54479 1.54479
+
+# create region of simulation box
+# style block is a regular box
+region 		myRegion block 0 ${Nc} 0 ${Nc} 0 ${Nc} units lattice
+region 		myRegion block 0 8 0 ${Nc} 0 ${Nc} units lattice
+region 		myRegion block 0 8 0 8 0 ${Nc} units lattice
+region 		myRegion block 0 8 0 8 0 8 units lattice
+
+# create box, 1 is number of atom types in this box
+create_box	1 myRegion
+Created orthogonal box = (0 0 0) to (12.3583 12.3583 12.3583)
+  1 by 1 by 1 MPI processor grid
+
+# fill lattice with atoms of type (user-specified) 1
+# style box fills the entire simulation box with particles on the lattice
+create_atoms	1 box
+Created 2048 atoms
+
+# mass of atom type 1
+mass		1 1.0
+
+# gaussian distributed velocities so that temperature is 3.0
+# 87287 is a seed
+# mom yes: zeroed linear momentum
+velocity	all create ${temp} 87287 mom yes dist gaussian
+velocity	all create 0.835177684052282 87287 mom yes dist gaussian
+
+
+
+### computes ###
+
+# displacement for diffusion
+compute displacement all displace/atom
+
+# radial distribution function for all atoms with 50 bins
+compute radialDist all rdf 50
+
+
+
+### potential ###
+
+# specify type of pair-wise potential
+# LJ-potential with cut-off 2.5
+pair_style	lj/cut 2.5
+
+# set coeff. in LJ-potential:
+# atomtype1 - atomtype2 - epsilon - sigma - cutoff1 - (cutoff2)
+pair_coeff	1 1 1.0 1.0 2.5
+
+
+
+### neighbour lists ###
+
+# set neighbour cut-off. Style bin is the fastest for "normal" systems
+# 0.3 is called the skin size
+neighbor	0.5 bin
+
+# update neighbour lists every 20 time steps
+# don't check if any atoms has moved more than half the skin size
+neigh_modify	every 20 delay 0 check no
+
+
+
+### integration ###
+
+# set time step
+timestep 0.01
+
+# set integrator
+run_style verlet
+
+# a fix is computed every time step
+# 1: user-assigned ID, all: group of atoms
+# nve: microcanonical integration to update positions and velocities
+fix		integration all nve
+
+# thermostat
+#fix berendsen all temp/berendsen ${temp} ${temp} 10.0
+
+
+### output ###
+
+# print thermodynamic properties every 50 time steps
+thermo		50
+thermo_style custom step temp density press ke pe etotal
+thermo_modify norm yes
+
+#dump stateFile all custom 10 argon.xyz id x y z vx vy vz
+
+# write displacement to file, include periodic b.c. effects
+#dump diffusion all custom 100 Data/diffusion*.dat c_displacement[4]
+
+# compute time averaged rdf every 100 time steps
+# 100 1 100: Nevery - Nrepeat - Nfreq means we calculate the time average for step multiples of Nfreq
+# but Nrepeat 1 means that we don't average over preceding steps
+# mode vector: input is a vector
+#fix radial all ave/time 100 10 1000 c_radialDist[*] file Data/radialDist.dat mode vector
+
+# run for specified number of steps
+run		501
+Neighbor list info ...
+  2 neighbor list requests
+  update every 20 steps, delay 0 steps, check no
+  max neighbors/atom: 2000, page size: 100000
+  master list distance cutoff = 3
+  ghost atom cutoff = 3
+  binsize = 1.5 -> bins = 9 9 9
+Memory usage per processor = 2.50069 Mbytes
+Step Temp Density Press KinEng PotEng TotEng 
+       0   0.83517768      1.08506    1.5809832    1.2521548   -8.0967423   -6.8445875 
+      50   0.42666699      1.08506    4.7239946   0.63968799   -7.4454932   -6.8058052 
+     100   0.43631779      1.08506    4.6426016   0.65415711   -7.4613725   -6.8072153 
+     150   0.43932896      1.08506    4.6202591   0.65867166   -7.4648971   -6.8062254 
+     200   0.41966662      1.08506    4.7652577   0.62919255   -7.4345858   -6.8053932 
+     250   0.42741789      1.08506     4.708533   0.64081379   -7.4466773   -6.8058635 
+     300   0.42585775      1.08506    4.7178752   0.63847472   -7.4433556   -6.8048809 
+     350    0.4306553      1.08506    4.6839803   0.64566753   -7.4505578   -6.8048903 
+     400   0.42520019      1.08506    4.7311494   0.63748886   -7.4423578   -6.8048689 
+     450   0.43136618      1.08506    4.6833613   0.64673332   -7.4527947   -6.8060614 
+     500   0.42352859      1.08506    4.7480886   0.63498268   -7.4391564   -6.8041737 
+     501   0.42284442      1.08506    4.7516077   0.63395693   -7.4379542   -6.8039973 
+Loop time of 1.00655 on 1 procs for 501 steps with 2048 atoms
+
+Performance: 430047.363 tau/day, 497.740 timesteps/s
+100.1% CPU use with 1 MPI tasks x no OpenMP threads
+
+MPI task timing breakdown:
+Section |  min time  |  avg time  |  max time  |%varavg| %total
+---------------------------------------------------------------
+Pair    | 0.87236    | 0.87236    | 0.87236    |   0.0 | 86.67
+Neigh   | 0.10806    | 0.10806    | 0.10806    |   0.0 | 10.74
+Comm    | 0.012721   | 0.012721   | 0.012721   |   0.0 |  1.26
+Output  | 0.0004158  | 0.0004158  | 0.0004158  |   0.0 |  0.04
+Modify  | 0.0099666  | 0.0099666  | 0.0099666  |   0.0 |  0.99
+Other   |            | 0.003023   |            |       |  0.30
+
+Nlocal:    2048 ave 2048 max 2048 min
+Histogram: 1 0 0 0 0 0 0 0 0 0
+Nghost:    4070 ave 4070 max 4070 min
+Histogram: 1 0 0 0 0 0 0 0 0 0
+Neighs:    135967 ave 135967 max 135967 min
+Histogram: 1 0 0 0 0 0 0 0 0 0
+
+Total # of neighbors = 135967
+Ave neighs/atom = 66.3901
+Neighbor list builds = 25
+Dangerous builds not checked
+
+
+
+
+
+
+
+
+
+
+Total wall time: 0:00:01
