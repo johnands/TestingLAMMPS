@@ -14,7 +14,7 @@ create_atoms	1 box
 
 # Stillinger-Weber
 pair_style		sw
-pair_coeff		* * Si.sw Si neighbours.txt
+pair_coeff		* * Si.sw Si #neighbours.txt
 
 # mass in grams/mole -> atom number
 mass            1 28.06
