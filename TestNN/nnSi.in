@@ -6,7 +6,7 @@ atom_style		atomic
 
 # tetrahedral structure: diamond
 # 5.431 is lattice constant in Angstrom
-variable 		L equal 6
+variable 		L equal 5
 lattice			diamond 5.431
 region			box block 0 ${L} 0 ${L} 0 ${L}
 create_box		1 box
@@ -14,7 +14,7 @@ create_atoms	1 box
 
 # Neural network
 pair_style		nn/angular
-pair_coeff		* * ../../TensorFlow/TrainingData/20.02-16.36.28 3.77118
+pair_coeff		* * ../../TensorFlow/TrainingData/03.03-17.57.14 3.77118
 
 # mass in grams/mole -> atom number
 mass            1 28.06
@@ -43,13 +43,13 @@ timestep		0.001
 #compute minNeigh all reduce min c_neighbours
 #compute aveNeigh all reduce ave c_neighbours
 
-#compute peAtom all pe/atom
-#compute avePe all reduce ave c_peAtom
+compute peAtom all pe/atom
+compute avePe all reduce ave c_peAtom
 
 # local computes like pair/local can be dumped with dump local
 # per-atom computes can be dumped with dump custom
 # global computes like minDist must be dumped with thermo custom
-thermo_style custom step temp pe #c_avePe
+thermo_style custom step temp pe cpuremain c_avePe
 thermo 1
 thermo_modify norm yes
 

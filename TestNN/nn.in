@@ -10,7 +10,7 @@ create_atoms 1 box
 mass 1 28.08
 
 pair_style nn/angular
-pair_coeff * * ../../TensorFlow/TrainingData/20.02-16.36.28 8.5125
+pair_coeff * * ../../TensorFlow/TrainingData/13.02-19.06.31 8.5125
 
 velocity all create 300.0 376847 
 #loop geom
