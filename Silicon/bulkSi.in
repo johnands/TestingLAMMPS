@@ -6,7 +6,7 @@ atom_style		atomic
 
 # tetrahedral structure: diamond
 # 5.431 is lattice constant in Angstrom
-variable 		L equal 6
+variable 		L equal 5
 lattice			diamond 5.431
 region			box block 0 ${L} 0 ${L} 0 ${L}
 create_box		1 box
@@ -75,6 +75,6 @@ thermo_modify norm yes
 #dump stateFile2 all xyz 5 Data/XYZData/SiL5300K.xyz
 
 # sampling run
-run 100
+run 500
 
 
