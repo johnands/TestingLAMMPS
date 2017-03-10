@@ -22,7 +22,7 @@ variable	temp equal 100/119.735
 variable	Nc equal 8
 
 # lattice constant in lj-units. 5.260: solid argon
-variable	lc equal 1.08506
+variable	lc equal 1.2#1.08506
 print "lc = ${lc}"
 
 variable	end equal ${lc}*${Nc}
@@ -65,11 +65,11 @@ compute radialDist all rdf 50
 
 # specify type of pair-wise potential
 # LJ-potential with cut-off 2.5
-#pair_style	lj/cut 2.5
+pair_style	lj/cut 2.5
 
 # set coeff. in LJ-potential:
 # atomtype1 - atomtype2 - epsilon - sigma - cutoff1 - (cutoff2)
-#pair_coeff	1 1 1.0 1.0 2.5
+pair_coeff	1 1 1.0 1.0 2.5
 
 
 ### neighbour lists ###

@@ -1,4 +1,4 @@
-LAMMPS (30 Jul 2016)
+LAMMPS (17 Jan 2017)
 ### initialization ###
 
 # sigma, epsilon, mass, boltzmann constant = 1
@@ -23,18 +23,18 @@ variable	temp equal 100/119.735
 variable	Nc equal 8
 
 # lattice constant in lj-units. 5.260: solid argon
-variable	lc equal 1.08506
+variable	lc equal 1.2#1.08506
 print "lc = ${lc}"
-lc = 1.08506
+lc = 1.2
 
 variable	end equal ${lc}*${Nc}
-variable	end equal 1.08506*${Nc}
-variable	end equal 1.08506*8
+variable	end equal 1.2*${Nc}
+variable	end equal 1.2*8
 
 # create lattice with specified lattice constant
 lattice 	fcc ${lc}
-lattice 	fcc 1.08506
-Lattice spacing in x,y,z = 1.54479 1.54479 1.54479
+lattice 	fcc 1.2
+Lattice spacing in x,y,z = 1.4938 1.4938 1.4938
 
 # create region of simulation box
 # style block is a regular box
@@ -45,7 +45,7 @@ region 		myRegion block 0 8 0 8 0 8 units lattice
 
 # create box, 1 is number of atom types in this box
 create_box	1 myRegion
-Created orthogonal box = (0 0 0) to (12.3583 12.3583 12.3583)
+Created orthogonal box = (0 0 0) to (11.9504 11.9504 11.9504)
   1 by 1 by 1 MPI processor grid
 
 # fill lattice with atoms of type (user-specified) 1
@@ -83,7 +83,6 @@ pair_style	lj/cut 2.5
 # set coeff. in LJ-potential:
 # atomtype1 - atomtype2 - epsilon - sigma - cutoff1 - (cutoff2)
 pair_coeff	1 1 1.0 1.0 2.5
-
 
 
 ### neighbour lists ###
@@ -136,50 +135,58 @@ thermo_modify norm yes
 # run for specified number of steps
 run		501
 Neighbor list info ...
-  2 neighbor list requests
   update every 20 steps, delay 0 steps, check no
   max neighbors/atom: 2000, page size: 100000
   master list distance cutoff = 3
   ghost atom cutoff = 3
-  binsize = 1.5 -> bins = 9 9 9
-Memory usage per processor = 2.50069 Mbytes
+  binsize = 1.5, bins = 8 8 8
+  2 neighbor lists, perpetual/occasional/extra = 1 1 0
+  (1) pair lj/cut, perpetual
+      pair build: half/bin/newton
+      stencil: half/bin/3d/newton
+      bin: standard
+  (2) compute rdf, occasional, copy from (1)
+      pair build: copy
+      stencil: none
+      bin: none
+Memory usage per processor = 3.55583 Mbytes
 Step Temp Density Press KinEng PotEng TotEng 
-       0   0.83517768      1.08506    1.5809832    1.2521548   -8.0967423   -6.8445875 
-      50   0.42666699      1.08506    4.7239946   0.63968799   -7.4454932   -6.8058052 
-     100   0.43631779      1.08506    4.6426016   0.65415711   -7.4613725   -6.8072153 
-     150   0.43932896      1.08506    4.6202591   0.65867166   -7.4648971   -6.8062254 
-     200   0.41966662      1.08506    4.7652577   0.62919255   -7.4345858   -6.8053932 
-     250   0.42741789      1.08506     4.708533   0.64081379   -7.4466773   -6.8058635 
-     300   0.42585775      1.08506    4.7178752   0.63847472   -7.4433556   -6.8048809 
-     350    0.4306553      1.08506    4.6839803   0.64566753   -7.4505578   -6.8048903 
-     400   0.42520019      1.08506    4.7311494   0.63748886   -7.4423578   -6.8048689 
-     450   0.43136618      1.08506    4.6833613   0.64673332   -7.4527947   -6.8060614 
-     500   0.42352859      1.08506    4.7480886   0.63498268   -7.4391564   -6.8041737 
-     501   0.42284442      1.08506    4.7516077   0.63395693   -7.4379542   -6.8039973 
-Loop time of 1.00655 on 1 procs for 501 steps with 2048 atoms
+       0   0.83517768          1.2    12.926476    1.2521548   -7.6089166   -6.3567618 
+      50   0.42660149          1.2    16.100602   0.63958979   -6.9874137   -6.3478239 
+     100    0.4304284          1.2    16.074556   0.64532735   -6.9934381   -6.3481107 
+     150   0.42775714          1.2    16.088208   0.64132242   -6.9894026   -6.3480802 
+     200   0.42903732          1.2    16.081903   0.64324175   -6.9913875   -6.3481458 
+     250   0.42412243          1.2    16.113692     0.635873     -6.98375    -6.347877 
+     300   0.43084895          1.2    16.065134   0.64595787   -6.9941684   -6.3482105 
+     350   0.42237583          1.2    16.134254   0.63325439   -6.9809606   -6.3477062 
+     400   0.42692065          1.2    16.098195   0.64006828    -6.988025   -6.3479567 
+     450   0.42505321          1.2     16.10756    0.6372685   -6.9851966   -6.3479281 
+     500   0.44078385          1.2    15.991508   0.66085294   -7.0092301   -6.3483771 
+     501   0.44009634          1.2    15.996473   0.65982217   -7.0082359   -6.3484138 
+Loop time of 1.21722 on 1 procs for 501 steps with 2048 atoms
 
-Performance: 430047.363 tau/day, 497.740 timesteps/s
-100.1% CPU use with 1 MPI tasks x no OpenMP threads
+Performance: 355615.763 tau/day, 411.592 timesteps/s
+94.4% CPU use with 1 MPI tasks x no OpenMP threads
 
 MPI task timing breakdown:
 Section |  min time  |  avg time  |  max time  |%varavg| %total
 ---------------------------------------------------------------
-Pair    | 0.87236    | 0.87236    | 0.87236    |   0.0 | 86.67
-Neigh   | 0.10806    | 0.10806    | 0.10806    |   0.0 | 10.74
-Comm    | 0.012721   | 0.012721   | 0.012721   |   0.0 |  1.26
-Output  | 0.0004158  | 0.0004158  | 0.0004158  |   0.0 |  0.04
-Modify  | 0.0099666  | 0.0099666  | 0.0099666  |   0.0 |  0.99
-Other   |            | 0.003023   |            |       |  0.30
+Pair    | 1.0019     | 1.0019     | 1.0019     |   0.0 | 82.31
+Neigh   | 0.14092    | 0.14092    | 0.14092    |   0.0 | 11.58
+Comm    | 0.033992   | 0.033992   | 0.033992   |   0.0 |  2.79
+Output  | 0.0014863  | 0.0014863  | 0.0014863  |   0.0 |  0.12
+Modify  | 0.022254   | 0.022254   | 0.022254   |   0.0 |  1.83
+Other   |            | 0.01667    |            |       |  1.37
 
 Nlocal:    2048 ave 2048 max 2048 min
 Histogram: 1 0 0 0 0 0 0 0 0 0
-Nghost:    4070 ave 4070 max 4070 min
+Nghost:    5097 ave 5097 max 5097 min
 Histogram: 1 0 0 0 0 0 0 0 0 0
-Neighs:    135967 ave 135967 max 135967 min
+Neighs:    140890 ave 140890 max 140890 min
 Histogram: 1 0 0 0 0 0 0 0 0 0
 
-Total # of neighbors = 135967
-Ave neighs/atom = 66.3901
+Total # of neighbors = 140890
+Ave neighs/atom = 68.7939
 Neighbor list builds = 25
 Dangerous builds not checked
 
