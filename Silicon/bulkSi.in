@@ -44,7 +44,7 @@ timestep		0.001
 #compute aveNeigh all reduce ave c_neighbours
 
 compute peAtom all pe/atom
-compute avePe all reduce ave c_peAtom
+compute avePe all reduce ave c_peAtom 
 
 # compute radial distribution with 50 bins
 #compute radialDist all rdf 50
@@ -61,8 +61,8 @@ compute avePe all reduce ave c_peAtom
 # local computes like pair/local can be dumped with dump local
 # per-atom computes can be dumped with dump custom
 # global computes like minDist must be dumped with thermo custom
-thermo_style custom step temp ke pe c_avePe
-thermo 1
+thermo_style custom step temp ke pe c_avePe press
+thermo 10
 thermo_modify norm yes
 
 
