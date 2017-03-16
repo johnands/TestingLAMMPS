@@ -6,7 +6,7 @@ atom_style		atomic
 
 # tetrahedral structure: diamond
 # 5.431 is lattice constant in Angstrom
-variable 		L equal 5
+variable 		L equal 6
 lattice			diamond 5.431
 region			box block 0 ${L} 0 ${L} 0 ${L}
 create_box		1 box
@@ -14,7 +14,7 @@ create_atoms	1 box
 
 # Stillinger-Weber
 pair_style		sw
-pair_coeff		* * Si.sw Si #neighbours.txt
+pair_coeff		* * Si.sw Si neighbours.txt
 
 # mass in grams/mole -> atom number
 mass            1 28.06
@@ -43,18 +43,8 @@ timestep		0.001
 #compute minNeigh all reduce min c_neighbours
 #compute aveNeigh all reduce ave c_neighbours
 
-# computes that I output to file via fixes
 compute peAtom all pe/atom
 compute avePe all reduce ave c_peAtom
-
-compute keAtom all ke/atom
-compute aveKe all reduce ave c_keAtom
-
-compute temperature all temp
-
-compute press all pressure temperature
-
-fix therm all ave/time 1 1 1 c_temperature c_aveKe c_avePe c_press file Data/Thermo/thermo.txt
 
 # compute radial distribution with 50 bins
 #compute radialDist all rdf 50
@@ -71,8 +61,8 @@ fix therm all ave/time 1 1 1 c_temperature c_aveKe c_avePe c_press file Data/The
 # local computes like pair/local can be dumped with dump local
 # per-atom computes can be dumped with dump custom
 # global computes like minDist must be dumped with thermo custom
-thermo_style custom step temp ke pe c_avePe press
-thermo 10
+thermo_style custom step temp ke pe c_avePe
+thermo 1
 thermo_modify norm yes
 
 
@@ -85,9 +75,6 @@ thermo_modify norm yes
 #dump stateFile2 all xyz 5 Data/XYZData/SiL5300K.xyz
 
 # sampling run
-run 1
-
-# make directory if sampling thermodynamics
-shell ./makeDirectory.sh
+run 20000
 
 
