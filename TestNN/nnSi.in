@@ -6,7 +6,7 @@ atom_style		atomic
 
 # tetrahedral structure: diamond
 # 5.431 is lattice constant in Angstrom
-variable 		L equal 5
+variable 		L equal 10
 lattice			diamond 5.431
 region			box block 0 ${L} 0 ${L} 0 ${L}
 create_box		1 box
@@ -55,7 +55,7 @@ compute temperature all temp
 
 compute press all pressure temperature
 
-fix therm all ave/time 1 1 1 c_temperature c_aveKe c_avePe c_press file Data/Thermo/thermo.txt
+#fix therm all ave/time 1 1 1 c_temperature c_aveKe c_avePe c_press file Data/Thermo/thermo.txt
 
 # local computes like pair/local can be dumped with dump local
 # per-atom computes can be dumped with dump custom
@@ -76,6 +76,6 @@ thermo_modify norm yes
 run 1000
 
 # make directory if sampling thermodynamics
-shell ./makeDirectory.sh
+#shell ./makeDirectory.sh
 
 

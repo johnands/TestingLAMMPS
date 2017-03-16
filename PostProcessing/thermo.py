@@ -29,14 +29,14 @@ def readFile(filename):
     return temperature, kineticEnergy, potentialEnergy, pressure
     
 
-tempNN, kinNN, potNN, pressNN = readFile('../TestNN/Data/Thermo/thermo.txt')
+tempNN, kinNN, potNN, pressNN = readFile('../TestNN/Data/Thermo/16.03-15.29.28/thermo.txt')
 tempSW, kinSW, potSW, pressSW = readFile('../Silicon/Data/Thermo/thermo.txt')
 
 totalEnergyNN = kinNN + potNN
 totalEnergySW = kinSW + potSW
 
 # compute averages
-
+#aveTempNN = np.sum(tempNN) / 
 
 plt.subplot(2,2,1)
 plt.plot(tempNN, 'b-', tempSW, 'g-')
