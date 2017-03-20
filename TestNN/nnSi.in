@@ -61,7 +61,7 @@ compute press all pressure temperature
 # per-atom computes can be dumped with dump custom
 # global computes like minDist must be dumped with thermo custom
 thermo_style custom step temp pe cpuremain c_avePe c_press press
-thermo 10
+thermo 1
 thermo_modify norm yes
 
 # new thermo dump
