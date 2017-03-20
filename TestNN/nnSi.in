@@ -3,16 +3,17 @@
 
 units			metal
 atom_style		atomic
+newton off
 
 # tetrahedral structure: diamond
 # 5.431 is lattice constant in Angstrom
-variable 		L equal 10
+variable 		L equal 5
 lattice			diamond 5.431
 region			box block 0 ${L} 0 ${L} 0 ${L}
 create_box		1 box
 create_atoms	1 box
 
-# Neural network
+# neural network
 pair_style		nn/angular2
 pair_coeff		* * ../../TensorFlow/TrainingData/16.03-15.52.43 3.70618783078
 
@@ -55,14 +56,15 @@ compute temperature all temp
 
 compute press all pressure temperature
 
-fix therm all ave/time 1 1 1 c_temperature c_aveKe c_avePe c_press file Data/Thermo/thermo.txt
+#fix therm all ave/time 1 1 1 c_temperature c_aveKe c_avePe c_press file Data/Thermo/thermo.txt
 
 # local computes like pair/local can be dumped with dump local
 # per-atom computes can be dumped with dump custom
 # global computes like minDist must be dumped with thermo custom
-thermo_style custom step temp pe cpuremain c_avePe c_press press
+thermo_style custom step temp pe cpuremain c_avePe etotal
 thermo 1
 thermo_modify norm yes
+
 
 # new thermo dump
 #thermo_style custom step temp etotal c_minDist c_avDist c_maxDist c_maxNeigh c_minNeigh c_aveNeigh
@@ -70,12 +72,12 @@ thermo_modify norm yes
 # dump positions for use in training
 #dump stateFile all custom 100 Data/SiL10*.xyz x y z
 
-#dump stateFile2 all xyz 5 Data/XYZData/SiL5300K.xyz
+dump stateFile2 all xyz 5 Data/XYZData/SiL5K1000.xyz
 
 # sampling run
 run 1000
 
 # make directory if sampling thermodynamics
-shell ./makeDirectory.sh
+#shell ./makeDirectory.sh
 
 

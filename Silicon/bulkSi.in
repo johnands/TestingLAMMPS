@@ -14,7 +14,7 @@ create_atoms	1 box
 
 # Stillinger-Weber
 pair_style		mysw
-pair_coeff		* * Si.sw Si #neighbours.txt
+pair_coeff		* * Si.sw Si neighbours.txt
 
 # mass in grams/mole -> atom number
 mass            1 28.06
@@ -54,7 +54,7 @@ compute temperature all temp
 
 compute press all pressure temperature
 
-fix therm all ave/time 1 1 1 c_temperature c_aveKe c_avePe c_press file Data/Thermo/thermo.txt
+#fix therm all ave/time 1 1 1 c_temperature c_aveKe c_avePe c_press file Data/Thermo/thermo.txt
 
 # compute radial distribution with 50 bins
 #compute radialDist all rdf 50
@@ -71,7 +71,7 @@ fix therm all ave/time 1 1 1 c_temperature c_aveKe c_avePe c_press file Data/The
 # local computes like pair/local can be dumped with dump local
 # per-atom computes can be dumped with dump custom
 # global computes like minDist must be dumped with thermo custom
-thermo_style custom step temp ke pe c_avePe press
+thermo_style custom step temp ke pe c_avePe 
 thermo 1
 thermo_modify norm yes
 
@@ -82,12 +82,12 @@ thermo_modify norm yes
 # dump positions for use in training
 #dump stateFile all custom 100 Data/SiL10*.xyz x y z
 
-#dump stateFile2 all xyz 5 Data/XYZData/SiL5300K.xyz
+dump stateFile2 all xyz 5 Data/XYZData/SiSWL51000K.xyz
 
 # sampling run
-run 110
+run 20000
 
 # make directory if sampling thermodynamics
-shell ./makeDirectory.sh
+#shell ./makeDirectory.sh
 
 
