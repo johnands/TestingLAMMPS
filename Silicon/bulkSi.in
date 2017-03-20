@@ -82,7 +82,7 @@ thermo_modify norm yes
 # dump positions for use in training
 #dump stateFile all custom 100 Data/SiL10*.xyz x y z
 
-dump stateFile2 all xyz 5 Data/XYZData/SiSWL51000K.xyz
+#dump stateFile2 all xyz 5 Data/XYZData/SiSWL51000K.xyz
 
 # sampling run
 run 20000

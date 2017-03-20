@@ -1,0 +1,17 @@
+When N3L, all ghost atoms will get a force. This force is added to the corresponding original atom
+when all the forces are calculated. Therefore the ghost atom index and not the tag should be used, because
+the ghost atom incidies appearently do not correspond to the original index, or tag. 
+
+If newton_pair is not on, the force is not added to the originals? Then then sum k > j wont work,
+because here there are also ghost atoms. So N3L must be on for this to work.
+But what about the pairs? N3L should be incorrect when I count all pairs during training. Do I have to use N3L for both pairs and triplets?
+Does it automatically work if I do the N3L test when I sample LAMMPS data?
+
+The force on atom i is the gradient of the total energy from all neighbouring atoms. But the energy on atom i due to the presence of atom j inside
+atom i's cutoff sphere is shared between the two. Therefore the total energy on atom i is half the energy. One must use half the energy
+to get the correct force? But then the NN should maybe just count half of them? This must be considered when not training against forces. 
+If the NN counts all pairs and get twice the energy as in lammps, then it learns that the energy is not shared. The energy value
+directly influences the force obtained when differentiating, resulting in wrong force. If the NN counts all pairs and learn to yield
+half the energy, then it learns that the energy is shared, but the resulting lower force is distributed on too many particles, 
+resulting in too small forces. The correct way (???) is to make the NN learn that the energy is shared, in addition to distribute
+the resulting force on just half the number of particles at a time.
