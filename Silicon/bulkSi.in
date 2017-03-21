@@ -14,7 +14,7 @@ create_atoms	1 box
 
 # Stillinger-Weber
 pair_style		mysw
-pair_coeff		* * Si.sw Si neighbours.txt
+pair_coeff		* * Si.sw Si #neighbours.txt
 
 # mass in grams/mole -> atom number
 mass            1 28.06
@@ -72,7 +72,7 @@ compute press all pressure temperature
 # per-atom computes can be dumped with dump custom
 # global computes like minDist must be dumped with thermo custom
 thermo_style custom step temp ke pe c_avePe etotal  
-thermo 1
+thermo 20
 thermo_modify norm yes
 
 
@@ -85,7 +85,7 @@ thermo_modify norm yes
 #dump stateFile2 all xyz 5 Data/XYZData/SiSWL51000K.xyz
 
 # sampling run
-run 2000
+run 80
 
 # make directory if sampling thermodynamics
 #shell ./makeDirectory.sh

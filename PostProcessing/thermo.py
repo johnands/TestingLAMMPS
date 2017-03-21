@@ -29,8 +29,8 @@ def readFile(filename):
     return temperature, kineticEnergy, potentialEnergy, pressure
     
 
-tempNN, kinNN, potNN, pressNN = readFile('../TestNN/Data/Thermo/20.03-20.30.11/thermo.txt')
-tempSW, kinSW, potSW, pressSW = readFile('../Silicon/Data/Thermo/thermo.txt')
+tempNN, kinNN, potNN, pressNN = readFile('../TestNN/Data/Thermo/21.03-14.16.57/thermo.txt')
+tempSW, kinSW, potSW, pressSW = readFile('../Silicon/Data/Thermo/21.03-14.05.53/thermo.txt')
 
 totalEnergyNN = kinNN + potNN
 totalEnergySW = kinSW + potSW
