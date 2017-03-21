@@ -71,7 +71,7 @@ compute press all pressure temperature
 # local computes like pair/local can be dumped with dump local
 # per-atom computes can be dumped with dump custom
 # global computes like minDist must be dumped with thermo custom
-thermo_style custom step temp ke pe c_avePe 
+thermo_style custom step temp ke pe c_avePe etotal  
 thermo 1
 thermo_modify norm yes
 
