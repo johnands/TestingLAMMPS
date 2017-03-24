@@ -85,7 +85,7 @@ thermo_modify norm yes
 #dump stateFile2 all xyz 5 Data/XYZData/SiSWL51000K.xyz
 
 # sampling run
-run 2000
+run 10
 
 # make directory if sampling thermodynamics
 #shell ./makeDirectory.sh
