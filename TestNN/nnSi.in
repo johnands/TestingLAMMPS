@@ -3,15 +3,18 @@
 
 units			metal
 atom_style		atomic
-#newton off
+newton on
 
 # tetrahedral structure: diamond
 # 5.431 is lattice constant in Angstrom
-variable 		L equal 5
+variable 		L equal 5	
 lattice			diamond 5.431
-region			box block 0 ${L} 0 ${L} 0 ${L}
-create_box		1 box
-create_atoms	1 box
+region myBox block 0 ${L} 0 ${L} 0 ${L}
+create_box 1 myBox
+create_atoms 1 box
+change_box all x delta -50 50
+change_box all y delta -50 50
+change_box all z delta -50 50
 
 # neural network
 pair_style		nn/angular2
@@ -72,10 +75,10 @@ thermo_modify norm yes
 # dump positions for use in training
 #dump stateFile all custom 100 Data/SiL10*.xyz x y z
 
-#dump stateFile2 all xyz 5 Data/XYZData/SiL5K1000.xyz
+#dump stateFile2 all xyz 2 Data/XYZData/SiL5K1000Test.xyz
 
 # sampling run
-run 10
+run 70
 
 # make directory if sampling thermodynamics
 #shell ./makeDirectory.sh

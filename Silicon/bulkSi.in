@@ -7,14 +7,18 @@ atom_style		atomic
 # tetrahedral structure: diamond
 # 5.431 is lattice constant in Angstrom
 variable 		L equal 5
+variable		Lbig equal 6	
 lattice			diamond 5.431
-region			box block 0 ${L} 0 ${L} 0 ${L}
-create_box		1 box
-create_atoms	1 box
+region myBox block 0 ${L} 0 ${L} 0 ${L}
+create_box 1 myBox
+create_atoms 1 box
+change_box all x delta -50 50
+change_box all y delta -50 50
+change_box all z delta -50 50
 
 # Stillinger-Weber
 pair_style		mysw
-pair_coeff		* * Si.sw Si neighbours.txt
+pair_coeff		* * Si.sw Si #neighbours.txt
 
 # mass in grams/mole -> atom number
 mass            1 28.06
@@ -85,7 +89,7 @@ thermo_modify norm yes
 #dump stateFile2 all xyz 5 Data/XYZData/SiSWL51000K.xyz
 
 # sampling run
-run 10
+run 70
 
 # make directory if sampling thermodynamics
 #shell ./makeDirectory.sh
