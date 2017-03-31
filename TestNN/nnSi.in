@@ -19,7 +19,7 @@ create_atoms 1 box
 
 # neural network
 pair_style		nn/angular2
-pair_coeff		* * ../../TensorFlow/TrainingData/16.03-15.52.43 3.70618783078 #3.77118
+pair_coeff		* * ../../TensorFlow/TrainingData/27.03-18.43.20 3.70618783078 #3.77118
 
 # mass in grams/mole -> atom number
 mass            1 28.06
@@ -60,13 +60,13 @@ compute temperature all temp
 
 compute press all pressure temperature
 
-fix therm all ave/time 1 1 1 c_temperature c_aveKe c_avePe c_press file Data/Thermo/thermo.txt
+#fix therm all ave/time 1 1 1 c_temperature c_aveKe c_avePe c_press file Data/Thermo/thermo.txt
 
 # local computes like pair/local can be dumped with dump local
 # per-atom computes can be dumped with dump custom
 # global computes like minDist must be dumped with thermo custom
 thermo_style custom step temp ke pe cpuremain c_avePe etotal
-thermo 20
+thermo 1
 thermo_modify norm yes
 
 
@@ -79,9 +79,9 @@ thermo_modify norm yes
 #dump stateFile2 all xyz 2 Data/XYZData/SiL5K1000Test.xyz
 
 # sampling run
-run 1000
+run 2000
 
 # make directory if sampling thermodynamics
-shell ./makeDirectory.sh
+#shell ./makeDirectory.sh
 
 
