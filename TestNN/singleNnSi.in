@@ -4,24 +4,19 @@
 units			metal
 atom_style		atomic
 
-#newton off
-
 # tetrahedral structure: diamond
 # 5.431 is lattice constant in Angstrom
 variable 		L equal 5	
 lattice			diamond 5.431
 region myBox block 0 ${L} 0 ${L} 0 ${L}
 create_box 1 myBox
-create_atoms 1 box
-#change_box all x delta -50 50
-#change_box all y delta -50 50
-#change_box all z delta -50 50
-
-#read_restart ../Silicon/Sitherm.restart
+create_atoms 1 single 10 10 10 units box
+create_atoms 1 single 12.5 10 10 units box
+create_atoms 1 single 11.25 12.5 10 units box
 
 # neural network
 pair_style		nn/angular2
-pair_coeff		* * ../../TensorFlow/TrainingData/22.03-15.06.05 3.70618783078 #3.77118
+pair_coeff		* * ../../TensorFlow/TrainingData/04.04-22.56.54 3.77118 #3.70618783078
 
 # mass in grams/mole -> atom number
 mass            1 28.06
@@ -29,11 +24,10 @@ mass            1 28.06
 velocity		all create 1000.0 376847 loop geom
 
 neighbor		1.0 bin
-neigh_modify    every 1 delay 0 check no
 
 fix				1 all nve
 
-#timestep		0.001
+timestep		0.001
 
 # pair-wise distance, this is a local compute
 #compute pairDist all pair/local dist
@@ -79,10 +73,10 @@ thermo_modify norm yes
 # dump positions for use in training
 #dump stateFile all custom 100 Data/SiL10*.xyz x y z
 
-#dump stateFile2 all xyz 2 Data/XYZData/SiL5K1000Test.xyz
+#dump stateFile2 all xyz 5 tmp/threeAtomsNN.xyz
 
 # sampling run
-run 1000
+run 100
 
 # make directory if sampling thermodynamics
 #shell ./makeDirectory.sh

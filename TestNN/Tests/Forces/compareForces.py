@@ -5,6 +5,7 @@ def readFile(filename):
     
     with open(filename, 'r') as infile:
         
+        print infile.readline()
         forces = []
         for line in infile:
             fi = []
@@ -18,14 +19,14 @@ def readFile(filename):
     
     return forces
     
-forcesNN = readFile('Box/forcesNNStart.txt')
+forcesNN = readFile('Box/forcesNN.txt')
 forcesSW = readFile('Box/forcesSW.txt')
 
 nAtoms = 1000
 
 # choose timestep and force component
 timeStep = 0
-timeStep /= 2
+timeStep /= 100
 xNN = forcesNN[timeStep*nAtoms+1:(timeStep+1)*nAtoms, 0]
 xSW = forcesSW[timeStep*nAtoms+1:(timeStep+1)*nAtoms, 0]
 yNN = forcesNN[timeStep*nAtoms+1:(timeStep+1)*nAtoms, 1]
@@ -87,6 +88,8 @@ aveDiffz = np.sum(diffz)/nAtoms
 print "average NN-SW x:", aveDiffx
 print "average NN-SW y:", aveDiffy
 print "average NN-SW z:", aveDiffz
+
+print "max NN-S x", np.max(diffx)
 
 aveDiffx = np.sum(xNN)/nAtoms
 aveDiffy = np.sum(yNN)/nAtoms

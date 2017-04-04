@@ -121,50 +121,52 @@ dump stateFile all custom 10 argon.xyz id x y z vx vy vz
 run	500
 
 
-
+W
 ### generate nanoporous system ###
 
 # make a centered cylinder 
-variable halfSize equal 33.5977/2.0
-region centeredCylinder cylinder x ${halfSize} ${halfSize} 5.87 EDGE EDGE units box
+#variable halfSize equal 33.5977/2.0
+#region centeredCylinder cylinder x ${halfSize} ${halfSize} 5.87 EDGE EDGE units box
 
 # make random spheres
 
 # random randius between 2 and 3 nm
-#variable radius equal random(5.87,8.81,1234)
+variable radius equal random(5.87,8.81,1234)
 
 # random centers
-#variable x equal random(0,36,3487)
-#variable y equal random(0,36,2384)
-#variable z equal random(0,36,2525)
+variable x equal random(0,36,3487)
+variable y equal random(0,36,2384)
+variable z equal random(0,36,2525)
 
 # loop to make 20 overlapping spheres
-#label       loop				# define label	
-#variable    a loop 20			# define loop variable: 1-20
-#if "$a < 21" then "region $a sphere $x $y $z ${radius}" 
-#next        a					# update a
-#jump        in.nanoPorous loop	# next iteration
+label       loop				# define label	
+variable    a loop 20			# define loop variable: 1-20
+if "$a < 21" then "region $a sphere $x $y $z ${radius}" 
+next        a					# update a
+jump        in.nanoPorous loop	# next iteration
 
 # delete loop variable
-#variable    a delete
+variable    a delete
 
-#region pores union 20 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 side out
-#region matrix union 20 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 side in
+region pores union 20 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 side out
+region matrix union 20 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 side in
 
 # define group and new integration
-group moving region centeredCylinder
-#group moving region pores
-#group nonMoving region matrix
+#group moving region centeredCylinder
+group moving region pores
+group nonMoving region matrix
 
 unfix integration
 fix integration2 moving nve
 
+set type
+
 #dump nano all custom 10 Data/cylinderFlow.xyz x y z vx vy vz
-dump nano all xyz 10 Data/cylinderFlow.xyz
+dump nano all xyz 10 Data/spheres.xyz
 #dump positions1 moving atom 10 Data/nanoSpheresPores.lammpstrj
 #dump positions2 nonMoving atom 10 Data/nanoSpheresMatrix.lammpstrj
 
-run 2000
+run 1
 
 
 

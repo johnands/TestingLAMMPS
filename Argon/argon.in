@@ -19,7 +19,7 @@ variable	temp equal 100/119.735
 ### create geometry ###
 
 # number of unit cells
-variable	Nc equal 8
+variable	Nc equal 15
 
 # lattice constant in lj-units. 5.260: solid argon
 variable	lc equal 1.2#1.08506
@@ -112,6 +112,8 @@ thermo_modify norm yes
 
 # write displacement to file, include periodic b.c. effects
 #dump diffusion all custom 100 Data/diffusion*.dat c_displacement[4]
+
+dump coords all custom 50 thermalized.xyz x y z vx vy vz
 
 # compute time averaged rdf every 100 time steps
 # 100 1 100: Nevery - Nrepeat - Nfreq means we calculate the time average for step multiples of Nfreq
