@@ -89,7 +89,7 @@ thermo_modify norm yes
 #dump stateFile2 all xyz 5 tmp/threeAtomsSW.xyz
 
 # sampling run
-run 100
+run 50
 
 #write_restart Sitherm.restart
 
