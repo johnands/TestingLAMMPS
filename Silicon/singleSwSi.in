@@ -16,9 +16,9 @@ create_atoms 1 single 12.5 10 10 units box
 create_atoms 1 single 11.25 12.5 10 units box
 #create_atoms 1 single 11.25 12.165 10 units box
 
-# neural network
-pair_style		nn/angular2
-pair_coeff		* * ../../TensorFlow/TrainingData/06.04-18.16.24 3.77118 #3.70618783078
+# Stillinger-Weber
+pair_style		mysw
+pair_coeff		* * Si.sw Si neighbours.txt
 
 # mass in grams/mole -> atom number
 mass            1 28.06
@@ -45,14 +45,14 @@ compute press all pressure temperature
 #fix therm all ave/time 1 1 1 c_temperature c_aveKe c_avePe c_press file Data/Thermo/thermo.txt
 
 # to terminal
-thermo_style custom step temp ke pe cpuremain c_avePe etotal
+thermo_style custom step temp ke pe c_avePe etotal  
 thermo 1
 thermo_modify norm yes
 
-#dump stateFile2 all xyz 50 tmp/threeAtomsNN.xyz
+#dump stateFile2 all xyz 5 tmp/threeAtomsSW.xyz
 
 # sampling run
-run 10000
+run 50
 
 # make directory if sampling thermodynamics
 #shell ./makeDirectory.sh

@@ -33,8 +33,8 @@ def readFile(filename):
     return temperature, kineticEnergy, potentialEnergy, pressure
     
 
-tempNN, kinNN, potNN, pressNN = readFile('../TestNN/Data/Thermo/04.04-23.11.23/thermo.txt')
-tempSW, kinSW, potSW, pressSW = readFile('../Silicon/Data/Thermo/04.04-22.33.34/thermo.txt')
+tempNN, kinNN, potNN, pressNN = readFile('../TestNN/Data/Thermo/06.04-21.26.25/thermo.txt')
+tempSW, kinSW, potSW, pressSW = readFile('../Silicon/Data/Thermo/06.04-12.08.58/thermo.txt')
 
 totalEnergyNN = kinNN + potNN
 totalEnergySW = kinSW + potSW
@@ -65,4 +65,7 @@ else:
     plt.subplot(2,2,4)
     plt.plot(totalEnergyNN)
     plt.show()
+    
+print sum(tempNN) / len(tempNN)
+print sum(tempSW) / len(tempSW)
 
