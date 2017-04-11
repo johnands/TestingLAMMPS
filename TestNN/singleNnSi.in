@@ -13,12 +13,12 @@ create_box 1 myBox
 
 create_atoms 1 single 10 10 10 units box
 create_atoms 1 single 12.5 10 10 units box
-create_atoms 1 single 11.25 12.5 10 units box
+#create_atoms 1 single 11.25 12.5 10 units box
 #create_atoms 1 single 11.25 12.165 10 units box
 
 # neural network
 pair_style		nn/angular2
-pair_coeff		* * ../../TensorFlow/TrainingData/06.04-18.16.24 3.77118 #3.70618783078
+pair_coeff		* * ../../TensorFlow/TrainingData/11.04-13.33.30 3.77118 #3.70618783078
 
 # mass in grams/mole -> atom number
 mass            1 28.06

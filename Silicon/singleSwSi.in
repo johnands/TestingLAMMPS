@@ -13,12 +13,12 @@ create_box 1 myBox
 
 create_atoms 1 single 10 10 10 units box
 create_atoms 1 single 12.5 10 10 units box
-create_atoms 1 single 11.25 12.5 10 units box
+#create_atoms 1 single 11.25 12.5 10 units box
 #create_atoms 1 single 11.25 12.165 10 units box
 
 # Stillinger-Weber
 pair_style		mysw
-pair_coeff		* * Si.sw Si neighbours.txt
+pair_coeff		* * Si.sw Si #neighbours.txt
 
 # mass in grams/mole -> atom number
 mass            1 28.06
