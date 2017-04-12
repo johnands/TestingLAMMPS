@@ -33,16 +33,34 @@ def readFile(filename):
     return temperature, kineticEnergy, potentialEnergy, pressure
     
 
-tempNN, kinNN, potNN, pressNN = readFile('../TestNN/Data/Thermo/06.04-21.26.25/thermo.txt')
-tempSW, kinSW, potSW, pressSW = readFile('../Silicon/Data/Thermo/06.04-12.08.58/thermo.txt')
+tempNN, kinNN, potNN, pressNN = readFile('../TestNN/Data/Thermo/12.04-15.45.02/thermo.txt')
+tempSW, kinSW, potSW, pressSW = readFile('../Silicon/Data/Thermo/12.04-15.45.04/thermo.txt')
 
 totalEnergyNN = kinNN + potNN
 totalEnergySW = kinSW + potSW
 
+numberOfSamples = len(tempNN)
+
 print "Slope of energy drift: ", (totalEnergyNN[-1] - totalEnergyNN[0])/len(tempNN)
-print len(tempNN)
+
 # compute averages
-#aveTempNN = np.sum(tempNN) / 
+aveTempNN = sum(tempNN) / numberOfSamples
+aveTempSW = sum(tempSW) / numberOfSamples
+aveKinNN = sum(kinNN) / numberOfSamples
+aveKinSW = sum(kinSW) / numberOfSamples
+avePotNN = sum(potNN) / numberOfSamples
+avePotSW = sum(potSW) / numberOfSamples
+aveTotNN = sum(totalEnergyNN) / numberOfSamples
+aveTotSW = sum(totalEnergySW) / numberOfSamples
+
+print "Average temp NN: ", aveTempNN
+print "Average temp SW: ", aveTempSW
+print "Average kin NN: ", aveKinNN
+print "Average kin SW: ", aveKinSW
+print "Average pot NN: ", avePotNN
+print "Average pot SW: ", avePotSW
+print "Average tot NN: ", aveTotNN
+print "Average tot SW: ", aveTotSW
 
 if plotBoth == 'both':
     plt.subplot(2,2,1)
@@ -66,6 +84,5 @@ else:
     plt.plot(totalEnergyNN)
     plt.show()
     
-print sum(tempNN) / len(tempNN)
-print sum(tempSW) / len(tempSW)
+
 
