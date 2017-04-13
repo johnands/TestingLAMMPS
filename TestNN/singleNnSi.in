@@ -1,3 +1,7 @@
+variable therm equal 0
+variable dump equal 0
+variable nSteps equal 100
+
 # bulk Si via Stillinger-Weber
 # test minimum distance that Si atoms can have in bulk Si
 
@@ -18,7 +22,7 @@ create_atoms 1 single 11.25 12.5 10 units box
 
 # neural network
 pair_style		nn/angular2
-pair_coeff		* * ../../TensorFlow/TrainingData/12.04-20.52.26 3.77118 #3.70618783078
+pair_coeff		* * ../../TensorFlow/TrainingData/13.04-22.00.13 3.77118 #3.70618783078
 
 # mass in grams/mole -> atom number
 mass            1 28.06
@@ -42,19 +46,22 @@ compute temperature all temp
 
 compute press all pressure temperature
 
-#fix therm all ave/time 1 1 1 c_temperature c_aveKe c_avePe c_press file Data/Thermo/thermo.txt
+if "${therm} == 1" then &
+	"fix therm all ave/time 1 1 1 c_temperature c_aveKe c_avePe c_press file Data/Thermo/thermo.txt"
 
 # to terminal
 thermo_style custom step temp ke pe cpuremain c_avePe etotal
 thermo 1
 thermo_modify norm yes
 
-#dump stateFile2 all xyz 50 tmp/threeAtomsNN.xyz
+if "${dump} == 1" then &
+	"dump stateFile2 all xyz 50 tmp/threeAtomsNN.xyz"
 
 # sampling run
-run 10
+run ${nSteps}
 
 # make directory if sampling thermodynamics
-#shell ./makeDirectory.sh
+if "${therm} == 1" then &
+	"shell ./makeDirectory.sh"
 
 

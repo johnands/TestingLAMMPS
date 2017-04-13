@@ -1,3 +1,8 @@
+variable dumpNeigh equal 1
+variable therm equal 0
+variable dumpxyz equal 0
+variable nSteps equal 1000
+
 # bulk Si via Stillinger-Weber
 # test minimum distance that Si atoms can have in bulk Si
 
@@ -18,7 +23,10 @@ create_atoms 1 single 11.25 12.5 10 units box
 
 # Stillinger-Weber
 pair_style		mysw
-pair_coeff		* * Si.sw Si #neighbours.txt
+if "${dumpNeigh} == 1" then &
+	"pair_coeff		* * Si.sw Si neighbours.txt" &
+else &
+	"pair_coeff		* * Si.sw Si"
 
 # mass in grams/mole -> atom number
 mass            1 28.06
@@ -26,6 +34,7 @@ mass            1 28.06
 velocity		all create 1000.0 376847 loop geom
 
 neighbor		1.0 bin
+neigh_modify    once yes
 
 fix				1 all nve
 
@@ -42,19 +51,22 @@ compute temperature all temp
 
 compute press all pressure temperature
 
-#fix therm all ave/time 1 1 1 c_temperature c_aveKe c_avePe c_press file Data/Thermo/thermo.txt
+if "${therm} == 1" then &
+	"fix therm all ave/time 1 1 1 c_temperature c_aveKe c_avePe c_press file Data/Thermo/thermo.txt"
 
 # to terminal
 thermo_style custom step temp ke pe c_avePe etotal  
 thermo 1
 thermo_modify norm yes
 
-#dump stateFile2 all xyz 5 Data/XYZData/threeAtomsNo2body.xyz
+if "${dumpxyz} == 1" then &
+	"dump stateFile2 all xyz 50 tmp/threeAtomsSW.xyz"
 
 # sampling run
-run 1000
+run ${nSteps}
 
 # make directory if sampling thermodynamics
-#shell ./makeDirectory.sh
+if "${therm} == 1" then &
+	"shell ./makeDirectory.sh"
 
 
