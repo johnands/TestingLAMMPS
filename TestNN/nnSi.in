@@ -1,3 +1,7 @@
+variable therm equal 0
+variable dump equal 0
+variable nSteps equal 100
+
 # bulk Si via Stillinger-Weber
 # test minimum distance that Si atoms can have in bulk Si
 
@@ -63,7 +67,8 @@ compute temperature all temp
 
 compute press all pressure temperature
 
-#fix therm all ave/time 1 1 1 c_temperature c_aveKe c_avePe c_press file Data/Thermo/thermo.txt
+if "${therm} == 1" then &
+	"fix therm all ave/time 1 1 1 c_temperature c_aveKe c_avePe c_press file Data/Thermo/thermo.txt"
 
 # local computes like pair/local can be dumped with dump local
 # per-atom computes can be dumped with dump custom
@@ -79,12 +84,14 @@ thermo_modify norm yes
 # dump positions for use in training
 #dump stateFile all custom 100 Data/SiL10*.xyz x y z
 
-#dump stateFile2 all xyz 2 Data/XYZData/SiL5K1000Test.xyz
+if "${dump} == 1" then &
+	"dump stateFile2 all xyz 50 tmp/threeAtomsNN.xyz"
 
 # sampling run
-run 1000
+run ${nSteps}
 
 # make directory if sampling thermodynamics
-#shell ./makeDirectory.sh
+if "${therm} == 1" then &
+	"shell ./makeDirectory.sh"
 
 

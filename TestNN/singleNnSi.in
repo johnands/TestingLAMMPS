@@ -1,6 +1,6 @@
 variable therm equal 0
 variable dump equal 0
-variable nSteps equal 100
+variable nSteps equal 1000
 
 # bulk Si via Stillinger-Weber
 # test minimum distance that Si atoms can have in bulk Si
@@ -22,7 +22,7 @@ create_atoms 1 single 11.25 12.5 10 units box
 
 # neural network
 pair_style		nn/angular2
-pair_coeff		* * ../../TensorFlow/TrainingData/13.04-22.00.13 3.77118 #3.70618783078
+pair_coeff		* * ../../TensorFlow/TrainingData/13.04-17.20.17 3.77118 #3.70618783078
 
 # mass in grams/mole -> atom number
 mass            1 28.06
