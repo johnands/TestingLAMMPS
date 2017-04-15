@@ -3,7 +3,7 @@ import matplotlib.pyplot as plt
 import sys
 
 
-plotBoth = sys.argv[1]
+plot = sys.argv[1]
 
 
 def readFile(filename):
@@ -64,7 +64,7 @@ print "Average pot SW: ", avePotSW
 print "Average tot NN: ", aveTotNN
 print "Average tot SW: ", aveTotSW
 
-if plotBoth == 'both':
+if plot == 'both':
     plt.subplot(2,2,1)
     plt.plot(tempNN, 'b-', tempSW, 'g-')
     plt.subplot(2,2,2)
