@@ -1,6 +1,8 @@
-variable therm equal 0
-variable dump equal 0
-variable nSteps equal 100
+variable dumpForces equal 0
+variable therm equal 1
+variable dumpxyz equal 0
+variable pseudoSim equal 0
+variable nSteps equal 1000	
 
 # bulk Si via Stillinger-Weber
 # test minimum distance that Si atoms can have in bulk Si
@@ -12,7 +14,7 @@ atom_style		atomic
 
 # tetrahedral structure: diamond
 # 5.431 is lattice constant in Angstrom
-variable 		L equal 5	
+variable 		L equal 1	
 lattice			diamond 5.431
 region myBox block 0 ${L} 0 ${L} 0 ${L}
 create_box 1 myBox
@@ -25,7 +27,7 @@ create_atoms 1 box
 
 # neural network
 pair_style		nn/angular2
-pair_coeff		* * ../../TensorFlow/TrainingData/22.03-15.06.05 3.70618783078 #3.77118
+pair_coeff		* * ../../TensorFlow/TrainingData/14.04-19.49.28 3.77118 #3.70618783078
 
 # mass in grams/mole -> atom number
 mass            1 28.06
@@ -33,9 +35,11 @@ mass            1 28.06
 velocity		all create 1000.0 376847 loop geom
 
 neighbor		1.0 bin
-neigh_modify    every 1 delay 0 check no
+neigh_modify    every 1 
 
-fix				1 all nve
+# integrate if ordinary simulation
+if "${pseudoSim} == 0" then &
+	"fix 1 all nve"
 
 #timestep		0.001
 
@@ -67,6 +71,9 @@ compute temperature all temp
 
 compute press all pressure temperature
 
+if "${dumpForces} == 1" then &
+	"dump forces all custom 1 forces.txt id fx fy fz"
+
 if "${therm} == 1" then &
 	"fix therm all ave/time 1 1 1 c_temperature c_aveKe c_avePe c_press file Data/Thermo/thermo.txt"
 
@@ -77,18 +84,20 @@ thermo_style custom step temp ke pe cpuremain c_avePe etotal
 thermo 1
 thermo_modify norm yes
 
-
 # new thermo dump
 #thermo_style custom step temp etotal c_minDist c_avDist c_maxDist c_maxNeigh c_minNeigh c_aveNeigh
 
 # dump positions for use in training
 #dump stateFile all custom 100 Data/SiL10*.xyz x y z
 
-if "${dump} == 1" then &
+if "${dumpxyz} == 1" then &
 	"dump stateFile2 all xyz 50 tmp/threeAtomsNN.xyz"
 
-# sampling run
-run ${nSteps}
+# pseudo simulation without integration or ordinary run
+if "${pseudoSim} == 1" then &
+	"rerun ../Silicon/configs.custom dump x y z vx vy vz format native" &
+else &
+	"run ${nSteps}"	
 
 # make directory if sampling thermodynamics
 if "${therm} == 1" then &

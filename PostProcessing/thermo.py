@@ -33,8 +33,8 @@ def readFile(filename):
     return temperature, kineticEnergy, potentialEnergy, pressure
     
 
-tempNN, kinNN, potNN, pressNN = readFile('../TestNN/Data/Thermo/21.03-13.48.16/thermo.txt')
-tempSW, kinSW, potSW, pressSW = readFile('../Silicon/Data/Thermo/21.03-14.05.53/thermo.txt')
+tempNN, kinNN, potNN, pressNN = readFile('../TestNN/Data/Thermo/16.04-22.49.34/thermo.txt')
+tempSW, kinSW, potSW, pressSW = readFile('../Silicon/Data/Thermo/16.04-22.37.48/thermo.txt')
 
 totalEnergyNN = kinNN + potNN
 totalEnergySW = kinSW + potSW
@@ -73,6 +73,12 @@ if plot == 'both':
     plt.plot(potNN, 'b-', potSW, 'g-')
     plt.subplot(2,2,4)
     plt.plot(totalEnergyNN, 'b-', totalEnergySW, 'g-')
+    plt.show()
+    
+elif plot == 'kin':
+    plt.plot(kinNN - kinSW)
+    plt.xlabel('Timestep')
+    plt.ylabel('Kinetic energy')
     plt.show()
     
 else: 

@@ -1,6 +1,7 @@
+variable dumpForces equal 1
 variable therm equal 0
 variable dump equal 0
-variable nSteps equal 1000
+variable nSteps equal 5
 
 units			metal
 atom_style		atomic
@@ -42,6 +43,9 @@ compute aveKe all reduce ave c_keAtom
 compute temperature all temp
 
 compute press all pressure temperature
+
+if "${dumpForces} == 1" then &
+	"dump forces all custom 1 singleForces.txt id fx fy fz"
 
 if "${therm} == 1" then &
 	"fix therm all ave/time 1 1 1 c_temperature c_aveKe c_avePe c_press file Data/Thermo/thermo.txt"
