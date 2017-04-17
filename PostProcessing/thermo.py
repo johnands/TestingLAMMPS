@@ -1,10 +1,12 @@
 import numpy as np
 import matplotlib.pyplot as plt
 import sys
+import os
 
-
-plot = sys.argv[1]
-
+if len(sys.argv) > 1:
+    plot = sys.argv[1]
+else:
+    plot = 'one'
 
 def readFile(filename):
     
@@ -32,37 +34,44 @@ def readFile(filename):
     
     return temperature, kineticEnergy, potentialEnergy, pressure
     
+    
+dirNameNN = '../TestNN/Data/Thermo/17.04-18.21.42/'
+dirNameSW = '../Silicon/Data/Thermo/17.04-18.29.40/'
 
-tempNN, kinNN, potNN, pressNN = readFile('../TestNN/Data/Thermo/16.04-22.49.34/thermo.txt')
-tempSW, kinSW, potSW, pressSW = readFile('../Silicon/Data/Thermo/16.04-22.37.48/thermo.txt')
+# write out README files
+print "Content of SW folder:"
+os.system('cat ' + dirNameSW + 'README.txt')
+print "Content of NN folder:"
+os.system('cat ' + dirNameNN + 'README.txt')
+
+tempNN, kinNN, potNN, pressNN = readFile(dirNameNN + 'thermo.txt')
+tempSW, kinSW, potSW, pressSW = readFile(dirNameSW + 'thermo.txt')
+
+potFactor = np.average(potNN / potSW)
+print "Potential energy factor: ", potFactor
+#potNN /= potFactor
 
 totalEnergyNN = kinNN + potNN
 totalEnergySW = kinSW + potSW
-
-print potNN[0] / potSW[0]
 
 numberOfSamples = len(tempNN)
 
 print "Slope of energy drift: ", (totalEnergyNN[-1] - totalEnergyNN[0])/len(tempNN)
 
-# compute averages
-aveTempNN = sum(tempNN) / numberOfSamples
-aveTempSW = sum(tempSW) / numberOfSamples
-aveKinNN = sum(kinNN) / numberOfSamples
-aveKinSW = sum(kinSW) / numberOfSamples
-avePotNN = sum(potNN) / numberOfSamples
-avePotSW = sum(potSW) / numberOfSamples
-aveTotNN = sum(totalEnergyNN) / numberOfSamples
-aveTotSW = sum(totalEnergySW) / numberOfSamples
+print 
+print "Average temp NN: ", np.average(tempNN)
+print "Average temp SW: ", np.average(tempSW)
+print "Average kin NN: ", np.average(kinNN)
+print "Average kin SW: ", np.average(kinSW)
+print "Average pot NN: ", np.average(potNN)
+print "Average pot SW: ", np.average(potSW)
+print "Average tot NN: ", np.average(totalEnergyNN)
+print "Average tot SW: ", np.average(totalEnergySW)
 
-print "Average temp NN: ", aveTempNN
-print "Average temp SW: ", aveTempSW
-print "Average kin NN: ", aveKinNN
-print "Average kin SW: ", aveKinSW
-print "Average pot NN: ", avePotNN
-print "Average pot SW: ", avePotSW
-print "Average tot NN: ", aveTotNN
-print "Average tot SW: ", aveTotSW
+print
+print "Std. dev. temp oscillations NN: ", np.std(tempNN)
+print "Std. dev. temp oscillations SW: ", np.std(tempSW)
+
 
 if plot == 'both':
     plt.subplot(2,2,1)

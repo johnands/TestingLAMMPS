@@ -1,7 +1,8 @@
-variable dumpForces equal 1
+variable dumpForces equal 0
 variable dumpNeigh equal 0
-variable therm equal 0
+variable therm equal 1
 variable dumpxyz equal 0
+variable dumpConfigs equal 0
 variable nSteps equal 1000
 
 # bulk Si via Stillinger-Weber
@@ -53,7 +54,7 @@ compute temperature all temp
 compute press all pressure temperature
 
 if "${dumpForces} == 1" then &
-	"dump forces all custom 1 singleForces.txt id fx fy fz"
+	"dump forces all custom 1 Data/Forces/forces.txt id fx fy fz"
 
 if "${therm} == 1" then &
 	"fix therm all ave/time 1 1 1 c_temperature c_aveKe c_avePe c_press file Data/Thermo/thermo.txt"
@@ -66,11 +67,18 @@ thermo_modify norm yes
 if "${dumpxyz} == 1" then &
 	"dump stateFile2 all xyz 50 tmp/threeAtomsSW.xyz"
 
+if "${dumpConfigs} == 1" then &
+	"dump configs all custom 1 Data/XYZData/Configs/3atoms.config id x y z vx vy vz"
+
 # sampling run
 run ${nSteps}
 
 # make directory if sampling thermodynamics
 if "${therm} == 1" then &
-	"shell ./makeDirectory.sh"
+	"shell ./makeThermoDir.sh"
+
+# make directory if sampling forces
+if "${dumpForces} == 1" then &
+	"shell ./makeForcesDir.sh"
 
 
