@@ -1,7 +1,7 @@
-variable dumpForces equal 0
-variable therm equal 1
+variable dumpForces equal 1
+variable therm equal 0
 variable dumpxyz equal 0
-variable pseudoSim equal 0
+variable pseudoSim equal 1
 variable nSteps equal 1000
 
 units			metal
@@ -21,7 +21,7 @@ create_atoms 1 single 11.25 12.5 10 units box
 
 # neural network
 pair_style		nn/angular2
-pair_coeff		* * ../../TensorFlow/TrainingData/14.04-16.49.20 3.77118 #3.70618783078
+pair_coeff		* * ../../TensorFlow/TrainingData/13.04-22.30.35 3.77118 #3.70618783078
 
 # mass in grams/mole -> atom number
 mass            1 28.06

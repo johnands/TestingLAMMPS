@@ -2,7 +2,7 @@ variable dumpForces equal 1
 variable therm equal 0
 variable dumpxyz equal 0
 variable pseudoSim equal 1
-variable nSteps equal 1000	
+variable nSteps equal 10	
 
 # bulk Si via Stillinger-Weber
 # test minimum distance that Si atoms can have in bulk Si
@@ -44,7 +44,8 @@ if "${pseudoSim} == 0" then &
 #timestep		0.001
 
 # pair-wise distance, this is a local compute
-compute pairDist all pair/local dist
+group chosen id 4
+compute pairDist chosen pair/local dist
 
 # number of neighbours for each atom
 #compute neighbours all coord/atom cutoff 3.77
