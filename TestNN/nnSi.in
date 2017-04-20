@@ -10,8 +10,6 @@ variable nSteps equal 10
 units			metal
 atom_style		atomic
 
-#newton off
-
 # tetrahedral structure: diamond
 # 5.431 is lattice constant in Angstrom
 variable 		L equal 1	
@@ -27,7 +25,7 @@ create_atoms 1 box
 
 # neural network
 pair_style		nn/angular2
-pair_coeff		* * ../../TensorFlow/TrainingData/14.04-19.49.28 3.77118 #3.70618783078
+pair_coeff		* * ../../TensorFlow/TrainingData/20.04-13.40.10 3.77118 #3.70618783078
 
 # mass in grams/mole -> atom number
 mass            1 28.06
@@ -92,11 +90,11 @@ thermo_modify norm yes
 #dump stateFile all custom 100 Data/SiL10*.xyz x y z
 
 if "${dumpxyz} == 1" then &
-	"dump stateFile2 all xyz 50 tmp/threeAtomsNN.xyz"
+	"dump stateFile2 all xyz 50 tmp/L$LNN.xyz"
 
 # pseudo simulation without integration or ordinary run
 if "${pseudoSim} == 1" then &
-	"rerun ../Silicon/Data/XYZData/Configs/L$LSW.config dump x y z vx vy vz" &
+	"rerun ../Silicon/Data/XYZData/Configs/L$LN3000SW.config dump x y z vx vy vz" &
 else &
 	"run ${nSteps}"	
 
