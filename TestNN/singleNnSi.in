@@ -17,11 +17,11 @@ create_box 1 myBox
 create_atoms 1 single 10 10 10 units box
 create_atoms 1 single 12.5 10 10 units box
 create_atoms 1 single 11.25 12.5 10 units box
-#create_atoms 1 single 11.25 11.25 12.5 units box
+create_atoms 1 single 11.25 11.25 12.5 units box
 
 # neural network
 pair_style		nn/angular2
-pair_coeff		* * ../../TensorFlow/TrainingData/20.04-21.51.29 3.77118 #3.70618783078
+pair_coeff		* * ../../TensorFlow/TrainingData/21.04-19.05.10 3.77118 #3.70618783078
 
 # mass in grams/mole -> atom number
 mass            1 28.06
@@ -61,7 +61,7 @@ if "${dumpxyz} == 1" then &
 
 # pseudo simulation without integration or ordinary run
 if "${pseudoSim} == 1" then &
-	"rerun ../Silicon/Data/XYZData/Configs/3atomsN10000.txt dump x y z vx vy vz" &
+	"rerun ../Silicon/Data/XYZData/Configs/4atomsN10000.txt dump x y z vx vy vz" &
 else &
 	"run ${nSteps}"	
 

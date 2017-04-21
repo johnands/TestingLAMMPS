@@ -21,7 +21,7 @@ create_box 1 myBox
 create_atoms 1 single 10 10 10 units box
 create_atoms 1 single 12.5 10 10 units box
 create_atoms 1 single 11.25 12.5 10 units box
-#create_atoms 1 single 11.25 11.25 12.5 units box
+create_atoms 1 single 11.25 11.25 12.5 units box
 
 # Stillinger-Weber
 pair_style		mysw
@@ -81,5 +81,9 @@ if "${therm} == 1" then &
 # make directory if sampling forces
 if "${dumpForces} == 1" then &
 	"shell ./makeForcesDir.sh"
+
+# copy log file
+if "${dumpNeigh} == 1" then &
+	"shell cp log.lammps "
 
 
