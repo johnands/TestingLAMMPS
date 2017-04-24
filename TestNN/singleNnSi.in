@@ -1,8 +1,8 @@
 variable dumpForces equal 0
-variable therm equal 1
+variable therm equal 0
 variable dumpxyz equal 0
 variable pseudoSim equal 0
-variable nSteps equal 10000
+variable nSteps equal 50000
 
 units			metal
 atom_style		atomic
@@ -53,7 +53,7 @@ if "${therm} == 1" then &
 
 # to terminal
 thermo_style custom step temp ke pe cpuremain c_avePe etotal
-thermo 1
+thermo 1000
 thermo_modify norm yes
 
 if "${dumpxyz} == 1" then &
