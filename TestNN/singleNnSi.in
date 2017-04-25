@@ -2,7 +2,7 @@ variable dumpForces equal 0
 variable therm equal 0
 variable dumpxyz equal 0
 variable pseudoSim equal 0
-variable nSteps equal 50000
+variable nSteps equal 10000
 
 units			metal
 atom_style		atomic
