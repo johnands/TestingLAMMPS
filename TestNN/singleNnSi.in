@@ -21,7 +21,7 @@ create_atoms 1 single 11.25 11.25 12.5 units box
 
 # neural network
 pair_style		nn/angular2
-pair_coeff		* * ../../TensorFlow/TrainingData/21.04-19.05.10 3.77118 #3.70618783078
+pair_coeff		* * ../../TensorFlow/TrainingData/25.04-18.27.52 3.77118 #3.70618783078
 
 # mass in grams/mole -> atom number
 mass            1 28.06

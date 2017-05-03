@@ -27,7 +27,7 @@ create_atoms 1 box
 # Stillinger-Weber
 pair_style		mysw
 if "${dumpNeigh} == 1" then &
-	"pair_coeff		* * Si.sw Si neighbours.txt" &
+	"pair_coeff		* * Si.sw Si TwoAtoms" &
 else &
 	"pair_coeff		* * Si.sw Si"
 
