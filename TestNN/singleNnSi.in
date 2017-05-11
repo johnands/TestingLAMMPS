@@ -1,7 +1,10 @@
-variable dumpForces equal 0
-variable therm equal 0
+variable dumpForces equal 1
+variable therm equal 1
 variable dumpxyz equal 0
-variable pseudoSim equal 0
+variable pseudoSim equal 1
+
+variable nAtoms equal 4
+variable initTemp equal 1000
 variable nSteps equal 10000
 
 units			metal
@@ -14,19 +17,27 @@ lattice			diamond 5.431
 region myBox block 0 ${L} 0 ${L} 0 ${L}
 create_box 1 myBox
 
-create_atoms 1 single 10 10 10 units box
-create_atoms 1 single 12.5 10 10 units box
-create_atoms 1 single 11.25 12.5 10 units box
-create_atoms 1 single 11.25 11.25 12.5 units box
+if "${nAtoms} == 2" then &
+	"create_atoms 1 single 10 10 10 units box" &
+	"create_atoms 1 single 12.5 10 10 units box"
+if "${nAtoms} == 3" then &
+	"create_atoms 1 single 10 10 10 units box" &
+	"create_atoms 1 single 12.5 10 10 units box" &
+	"create_atoms 1 single 11.25 12.5 10 units box"
+if "${nAtoms} == 4" then &
+	"create_atoms 1 single 10 10 10 units box" &
+	"create_atoms 1 single 12.5 10 10 units box" &
+	"create_atoms 1 single 11.25 12.5 10 units box" &
+	"create_atoms 1 single 11.25 11.25 12.5 units box"
 
 # neural network
 pair_style		nn/angular2
-pair_coeff		* * ../../TensorFlow/TrainingData/25.04-18.27.52 3.77118 #3.70618783078
+pair_coeff		* * ../../TensorFlow/TrainingData/11.05-21.16.09 3.77118 
 
 # mass in grams/mole -> atom number
 mass            1 28.06
 
-velocity		all create 1000.0 376847 loop geom
+velocity		all create ${initTemp} 376847 loop geom
 
 neighbor		1.0 bin
 
@@ -61,16 +72,17 @@ if "${dumpxyz} == 1" then &
 
 # pseudo simulation without integration or ordinary run
 if "${pseudoSim} == 1" then &
-	"rerun ../Silicon/Data/XYZData/Configs/4atomsN10000.txt dump x y z vx vy vz" &
+	"rerun ../Silicon/Data/XYZData/Configs/${nAtoms}atomsN${nSteps}.txt &
+	dump x y z vx vy vz" &
 else &
 	"run ${nSteps}"	
 
 # make directory if sampling thermodynamics
 if "${therm} == 1" then &
-	"shell ./makeThermoDir.sh"
+	"shell ./makeDirs/makeThermoDir.sh"
 
 # make directory if sampling forces
 if "${dumpForces} == 1" then &
-	"shell ./makeForcesDir.sh"
+	"shell ./makeDirs/makeForcesDir.sh"
 
 

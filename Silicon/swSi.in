@@ -1,9 +1,12 @@
 variable dumpForces equal 0
 variable dumpNeigh equal 0
 variable therm equal 0
-variable dumpxyz equal 1
+variable dumpxyz equal 0
 variable dumpConfigs equal 0
-variable nSteps equal 3000
+
+variable L equal 1
+variable initTemp equal 1000
+variable nSteps equal 10
 
 # bulk Si via Stillinger-Weber
 
@@ -11,10 +14,9 @@ units			metal
 atom_style		atomic
 
 # tetrahedral structure: diamond
-# 5.431 is lattice constant in Angstrom
-variable 		L equal 1	
+# 5.431 is lattice constant in Angstrom	
 lattice			diamond 5.431
-region myBox block 0 ${L} 0 ${L} 0 ${L}
+region myBox block 0 $L 0 $L 0 $L
 create_box 1 myBox
 create_atoms 1 box
 #change_box all x delta -50 50
@@ -23,7 +25,6 @@ create_atoms 1 box
 
 #read_restart Sitherm.restart
 
-# Stillinger-Weber
 # Stillinger-Weber
 pair_style		mysw
 if "${dumpNeigh} == 1" then &
@@ -34,7 +35,7 @@ else &
 # mass in grams/mole -> atom number
 mass            1 28.06
 
-velocity		all create 1000.0 376847 loop geom
+velocity		all create ${initTemp} 376847 loop geom
 
 neighbor		1.0 bin
 
@@ -70,12 +71,13 @@ compute temperature all temp
 compute press all pressure temperature
 
 # displacement for diffusion
-compute displacement all displace/atom
-dump diffusion all custom 1 tmp/diffusion.txt id c_displacement[1] &
-c_displacement[2] c_displacement[3] c_displacement[4]
+#compute displacement all displace/atom
+#dump diffusion all custom 1 tmp/diffusion.txt id c_displacement[1] &
+#c_displacement[2] c_displacement[3] c_displacement[4]
 
 if "${dumpForces} == 1" then &
-	"dump forces all custom 1 Data/Forces/forces.txt id fx fy fz"
+	"dump forces all custom 1 Data/Forces/forces.txt id fx fy fz" &
+	"dump_modify forces sort id"
 
 if "${therm} == 1" then &
 	"fix therm all ave/time 1 1 1 c_temperature c_aveKe c_avePe c_press file Data/Thermo/thermo.txt"
@@ -113,10 +115,14 @@ run ${nSteps}
 
 # make directory if sampling thermodynamics
 if "${therm} == 1" then &
-	"shell ./makeThermoDir.sh"
+	"shell ./makeDirs/makeThermoDir.sh"
 
 # make directory if sampling forces
 if "${dumpForces} == 1" then &
-	"shell ./makeForcesDir.sh"
+	"shell ./makeDirs/makeForcesDir.sh"
+
+# make directory if sampling training data
+if "${dumpNeigh} == 1" then &
+	"shell ./makeDirs/makeTrainingDirBulk.sh"
 
 

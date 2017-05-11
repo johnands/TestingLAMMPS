@@ -1,8 +1,11 @@
 variable dumpForces equal 1
 variable therm equal 0
-variable dumpxyz equal 0
+variable dumpxyz equal 1
 variable pseudoSim equal 1
-variable nSteps equal 10	
+
+variable L equal 1
+variable initTemp equal 1000
+variable nSteps equal 10
 
 # bulk Si via Stillinger-Weber
 # test minimum distance that Si atoms can have in bulk Si
@@ -11,10 +14,9 @@ units			metal
 atom_style		atomic
 
 # tetrahedral structure: diamond
-# 5.431 is lattice constant in Angstrom
-variable 		L equal 1	
+# 5.431 is lattice constant in Angstrom	
 lattice			diamond 5.431
-region myBox block 0 ${L} 0 ${L} 0 ${L}
+region myBox block 0 $L 0 $L 0 $L
 create_box 1 myBox
 create_atoms 1 box
 #change_box all x delta -50 50
@@ -30,10 +32,10 @@ pair_coeff		* * ../../TensorFlow/TrainingData/20.04-13.40.10 3.77118 #3.70618783
 # mass in grams/mole -> atom number
 mass            1 28.06
 
-velocity		all create 1000.0 376847 loop geom
+velocity		all create ${initTemp} 376847 loop geom
 
 neighbor		1.0 bin
-neigh_modify    every 1 
+#neigh_modify    every 1 
 
 # integrate if ordinary simulation
 if "${pseudoSim} == 0" then &
@@ -71,7 +73,8 @@ compute temperature all temp
 compute press all pressure temperature
 
 if "${dumpForces} == 1" then &
-	"dump forces all custom 1 Data/Forces/forces.txt id fx fy fz"
+	"dump forces all custom 1 Data/Forces/forces.txt id fx fy fz" &
+	"dump_modify forces sort id"
 
 if "${therm} == 1" then &
 	"fix therm all ave/time 1 1 1 c_temperature c_aveKe c_avePe c_press file Data/Thermo/thermo.txt"
@@ -94,16 +97,19 @@ if "${dumpxyz} == 1" then &
 
 # pseudo simulation without integration or ordinary run
 if "${pseudoSim} == 1" then &
-	"rerun ../Silicon/Data/XYZData/Configs/L$LN3000SW.config dump x y z vx vy vz" &
+	"rerun ../Silicon/Data/XYZData/Configs/L$LN${nSteps}.config &
+	dump x y z vx vy vz" &
 else &
 	"run ${nSteps}"	
 
+# make directory if sampling neighbour lists
+
 # make directory if sampling thermodynamics
 if "${therm} == 1" then &
-	"shell ./makeThermoDir.sh"
+	"shell ./makeDirs/makeThermoDir.sh"
 
 # make directory if sampling forces
 if "${dumpForces} == 1" then &
-	"shell ./makeForcesDir.sh"
+	"shell ./makeDirs/makeForcesDir.sh"
 
 

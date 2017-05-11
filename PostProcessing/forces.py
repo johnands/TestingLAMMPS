@@ -1,7 +1,28 @@
+"""
+Analyze forces dumped with LAMMPS: 
+*   Plot forces of empirical potential that is reproduced and 
+    NN forces as function of time step to compare
+    (both real simulations and pseudo-simulations)
+*   Calculate various error estimates
+*   Check that sum of forces is zero
+
+
+
+"""
+
 import numpy as np
 import matplotlib.pyplot as plt
-import os
-    
+
+import os, sys, inspect
+currentdir = os.path.dirname(os.path.abspath(inspect.getfile(inspect.currentframe())))
+parentdir = os.path.dirname(currentdir)
+grandParentDir = os.path.dirname(parentdir)
+gGrandParentDir = os.path.dirname(grandParentDir)
+sys.path.insert(0, parentdir) 
+sys.path.insert(1, grandParentDir)
+sys.path.insert(2, gGrandParentDir)
+
+import TensorFlow.DataGeneration.readers as readers
     
 def readForceFile(filename):
    
@@ -20,6 +41,7 @@ def readForceFile(filename):
         numberOfAtoms = int(infile.readline())
         print "Number of atoms: ", numberOfAtoms
       
+        i = 0
         for line in infile:
             words = line.split()
             
@@ -37,110 +59,27 @@ def readForceFile(filename):
                 continue
                 
             if force:
+                i += 1
                 forcei = []
                 forcei.append(float(words[1]))
                 forcei.append(float(words[2]))
                 forcei.append(float(words[3]))
                 forces.append(forcei)
-                if int(words[0]) == numberOfAtoms:
-                    force = False
+                if i == numberOfAtoms:
+                    i = 0
+                    force = False 
            
     return np.array(timeSteps), np.array(forces), numberOfAtoms
-    
-    
-def readNeighbourFile(filename):
-    
-    with open(filename, 'r') as infile:
-        
-        x = []; y = []; z = []
-        r = [];
-        for line in infile:
-            words = line.split()
-            N = len(words) / 4
-            xi = []; yi = []; zi = [];
-            ri = [];
-            for i in xrange(N):
-                xi.append(float(words[4*i]))
-                yi.append(float(words[4*i+1]))
-                zi.append(float(words[4*i+2]))
-                ri.append(float(words[4*i+3]))
-                
-            x.append(xi)
-            y.append(yi)
-            z.append(zi)
-            r.append(ri)
-                      
-    return x, y, z, r
-    
-    
-def readDisplacementFile(filename):
-    
-    with open(filename, 'r') as infile:
-        
-        atoms = False  
-        timeStep = False         
-        dx = []; dy = []; dz = []
-        dr = []
-        timeSteps = []
-        
-        # read number of atoms and first time step
-        infile.readline()
-        timeSteps.append(int(infile.readline()))
-        
-        infile.readline()
-        numberOfAtoms = int(infile.readline())
-        print "Number of atoms: ", numberOfAtoms
-        
-        chosenAtom = numberOfAtoms/2
-        print "Chosen atom: ", chosenAtom
-         
-        for line in infile:
-            words = line.split()
-            
-            if words[-1] == 'TIMESTEP':
-                timeStep = True
-                continue
-                
-            if words[-1] == 'c_displacement[4]':
-                atoms = True
-                continue
-            
-            if timeStep:
-                timeSteps.append(int(words[0]))
-                timeStep = False
-                continue
-                
-            if atoms:
-                if int(words[0]) == chosenAtom:
-                    dx.append(float(words[1]))
-                    dy.append(float(words[2]))
-                    dz.append(float(words[3]))
-                    dr.append(float(words[4]))
-                    atoms = False
-                    
-    return dx, dy, dz, dr
+
     
 
 # read force files
-dirNameNN = '../TestNN/Data/Forces/21.04-19.36.16/'
-dirNameSW = '../Silicon/Data/Forces/20.04-14.12.41/'
-
-# read displacement file
-dx, dy, dz, dr = readDisplacementFile('../Silicon/tmp/diffusion.txt')
-
-"""plt.subplot(4,1,1)
-plt.plot(dx)
-plt.subplot(4,1,2)
-plt.plot(dy)
-plt.subplot(4,1,3)
-plt.plot(dz)
-plt.subplot(4,1,4)
-plt.plot(dr)
-plt.show()"""
+dirNameNN = '../TestNN/Data/Forces/4atomsN1e4Pseudo/'
+dirNameSW = '../Silicon/Data/Forces/4atomsN1e4/'
 
 # read neighbour file
-distSW = '../Silicon/Data/20.04-14.03.17/neighbours.txt'
-x, y, z, r = readNeighbourFile(distSW)
+distSW = '../Silicon/Data/TrainingData/4atoms/T1e3N1e4/neighbours.txt'
+x, y, z, r, _ = readers.readNeighbourData(distSW)
 
 # write out README files
 print "Content of SW folder:"
@@ -148,18 +87,14 @@ os.system('cat ' + dirNameSW + 'README.txt')
 print "Content of NN folder:"
 os.system('cat ' + dirNameNN + 'README.txt')
 
-readAllForces = True
+# read all forces in force file
+timeStepsNN, forcesNN, numberOfAtomsNN = readForceFile(dirNameNN + 'forces.txt')
+timeStepsSW, forcesSW, numberOfAtomsSW = readForceFile(dirNameSW + 'forces.txt')
+assert(numberOfAtomsNN == numberOfAtomsSW)
+numberOfAtoms = numberOfAtomsNN
 
-if readAllForces:
-    timeStepsNN, forcesNN, numberOfAtomsNN = readForceFile(dirNameNN + 'forces.txt')
-    timeStepsSW, forcesSW, numberOfAtomsSW = readForceFile(dirNameSW + 'forces.txt')
-    assert(numberOfAtomsNN == numberOfAtomsSW)
-    numberOfAtoms = numberOfAtomsNN
-else:
-    timeStepsNN, forcesNN = readForceFile(dirNameNN + 'forces.txt', 1)
-    timeStepsSW, forcesSW = readForceFile(dirNameSW + 'forces.txt', 1)
-
-if not ( len(timeStepsNN) == len(timeStepsSW) and timeStepsNN.all() == timeStepsSW.all() ):
+# check that time step arrays of SW and NN are equal
+if not np.array_equal(timeStepsNN, timeStepsSW):
     print 'Forces for NN and SW must be sampled for the same time steps'
     exit(1)
 else:
@@ -168,6 +103,7 @@ else:
 nTimeSteps = len(timeSteps)
 print "Number of time steps: ", nTimeSteps
     
+# access components
 FxNN = forcesNN[:,0]
 FyNN = forcesNN[:,1]
 FzNN = forcesNN[:,2]
@@ -194,7 +130,8 @@ if (sumsNN > 1e-4).any():
 print "Max sum-of-forces NN: ", np.max(sumsNN)
 print "Max sum-of-forces SW: ", np.max(sumsSW)
     
-chosenAtom = 1
+# choose one atom to plot forces and calculate errors
+chosenAtom = 0
 print "Chosen atom: ", chosenAtom
 
 FxNN = FxNN[np.arange(chosenAtom, len(FxNN), numberOfAtoms)]
@@ -227,57 +164,61 @@ for i in xrange(len(r)):
     rStd[i] = np.std(ri)
     coordNumber[i] = len(ri)
     
-"""plt.figure()
-plt.plot(timeStepsNN, coordNumber)
-plt.legend('Coordination number')
-plt.axis([0, 1000, 0, 3])
-plt.show()"""
+plt.figure()
+plt.plot(timeStepsNN[0::10], coordNumber)
+plt.xlabel('Time step')
+plt.ylabel('Coordination number')
+plt.show()
 
 ### investigate for correlations ###
 
-# correlations between std. dev. of distances and force error
-bottoms = np.where(rStd < 0.3)[0]
-tops = np.where(rStd > 0.3)[0]
-
-"""# displacement
-errorVsDisplace = []
-displaceValues = np.linspace(0, np.max(dx), 6)
-for i in xrange(len(displaceValues)-1):
-    interval = np.where(dx < displaceValues[i+1])[0]
-    errorVsDisplace.append(np.std(xError[interval]))
-    #errorVsDisplace.append( np.sqrt(np.mean(np.abs(xError[interval] - xError.mean())**2)) / len()) 
-plt.plot(displaceValues[1:], errorVsDisplace)
-plt.show()"""
+# plot error vs |F|
+errorVsForce = []
+forceValues = np.linspace(0, np.max(Fnn), 6)
+for i in xrange(len(forceValues)-1):
+    interval = np.where(Fnn < forceValues[i+1])[0]
+    errorVsForce.append(np.std(absError[interval]))
+    #errorVsForce.append(np.sum(absError[interval]**2)/len(interval))
+plt.figure()
+plt.plot(forceValues[1:], errorVsForce)
+plt.xlabel('Absolute force NN')
+plt.ylabel('Error')
+plt.show()
     
-
-
 # correlations with coordination number
 coordUnique = np.unique(coordNumber)
 print "Coordination numbers: ", coordUnique
 plt.figure()
 plt.hist(coordNumber, bins=4)
+plt.legend(['Coordination numbers'])
 
-"""# find error as function of coordination number
-coordsVsR = []
+# find error as function of coordination number
+errorVsCoords = []
 for coord in coordUnique:
     indicies = np.where(coordNumber == coord)[0]
-    coordsVsR.append(np.std(absError[indicies]))
+    errorVsCoords.append(np.std(absError[indicies]))
     
 plt.figure()
-plt.plot(coordUnique, coordsVsR) 
-plt.show()"""
+plt.plot(coordUnique, errorVsCoords) 
+plt.xlabel('Coordination number')
+plt.ylabel('Error')
+plt.show()
 
-"""xBottoms = xError[bottoms]
+# correlations between std. dev. of distances and force error
+bottoms = np.where(rStd < 0.3)[0]
+tops = np.where(rStd > 0.3)[0]
+
+xBottoms = xError[bottoms]
 xTops = xError[tops]
 yBottoms = yError[bottoms]
 yTops = yError[tops]
 zBottoms = zError[bottoms]
 zTops = zError[tops]
 absBottoms = absError[bottoms]
-absTops = absError[tops]"""
+absTops = absError[tops]
     
 # plots of environment variables
-"""plt.subplot(4,1,1)
+plt.subplot(4,1,1)
 plt.plot(rAverage)
 plt.legend(['rAverage'])
 plt.subplot(4,1,2)
@@ -289,18 +230,18 @@ plt.legend(['rMin'])
 plt.subplot(4,1,4)
 plt.plot(rStd)
 plt.legend(['rStd'])
-#plt.show()  
-#plt.savefig('tmp/dist.pdf')"""
+plt.show()  
+#plt.savefig('tmp/dist.pdf')
 
 
-"""print "bottoms x: ", np.std(xBottoms)
+print "bottoms x: ", np.std(xBottoms)
 print "tops x: ", np.std(xTops)
 print "bottoms y: ", np.std(yBottoms)
 print "tops y: ", np.std(yTops)
 print "bottoms z: ", np.std(zBottoms)
 print "tops z: ", np.std(zTops)
 print "bottoms abs: ", np.std(absBottoms)
-print "tops abs: ", np.std(absTops)"""
+print "tops abs: ", np.std(absTops)
 
 # output
 print "Average error Fx: ", np.average(xError)
@@ -336,21 +277,29 @@ plt.xlabel('Timestep')
 plt.legend([r'$|F|^{NN}$', r'$|F|^{SW}$'])
 
 plt.subplot(4,2,2)
-plt.plot(timeStepsNN, xError)#, timeStepsNN, dx, 'y-')
+plt.plot(timeStepsNN, xError)
 plt.ylabel(r'$\Delta F_x$')
 
 plt.subplot(4,2,4)
-plt.plot(timeStepsNN, yError)#, timeStepsNN, dy, 'y-')
+plt.plot(timeStepsNN, yError)
 plt.ylabel(r'$\Delta F_y$')     
 
 plt.subplot(4,2,6)        
-plt.plot(timeStepsNN, zError)#, timeStepsNN, dz, 'y-')
+plt.plot(timeStepsNN, zError)
 plt.ylabel(r'$\Delta F_z$')
 
 plt.subplot(4,2,8)       
-plt.plot(timeStepsNN, absError)#, 'b-', timeStepsNN, dr, 'y-')
+plt.plot(timeStepsNN, absError)
 plt.xlabel('Timestep')
 plt.ylabel(r'$\Delta F$')
 
+plt.show()
+
+plt.figure()
+
+# plot histogram of forces
+plt.hist(Fsw)
+plt.xlabel('|F|')
+plt.ylabel('Number of forces')
 plt.show()
 
