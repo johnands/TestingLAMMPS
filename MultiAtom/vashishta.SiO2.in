@@ -1,0 +1,46 @@
+# test Vashishta potential for quartz
+
+units		metal
+boundary	p p p
+
+atom_style	atomic
+
+read_data	data.quartz
+
+replicate       4 4 4
+velocity	all create 2000.0 277387 mom yes
+displace_atoms	all move 0.05 0.9 0.4 units box
+
+pair_style 	myvashishta
+pair_coeff	* *  vashishta/SiO.1990.vashishta Si O
+
+neighbor	0.3 bin
+neigh_modify	delay 10
+
+fix		1 all nve
+thermo		10
+timestep	0.001
+
+compute peAtom all pe/atom
+compute avePe all reduce ave c_peAtom
+
+compute pairs all coord/atom cutoff 10
+compute triplets all coord/atom cutoff 2.60 
+
+compute maxPairs all reduce max c_pairs
+compute minPairs all reduce min c_pairs
+compute avePairs all reduce ave c_pairs
+
+compute maxTriplets all reduce max c_triplets
+compute minTriplets all reduce min c_triplets
+compute aveTriplets all reduce ave c_triplets
+
+thermo_style custom step temp ke pe c_avePe press c_minPairs c_avePairs c_maxPairs c_minTriplets c_aveTriplets c_maxTriplets
+thermo 10
+thermo_modify norm yes
+
+#dump		1 all cfg 10 *.cfg mass type xs ys zs vx vy vz fx fy fz
+#dump_modify	1 element Si O
+
+run		100
+
