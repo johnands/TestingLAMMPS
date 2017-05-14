@@ -32,7 +32,7 @@ if "${nAtoms} == 4" then &
 
 # neural network
 pair_style		nn/angular2
-pair_coeff		* * ../../TensorFlow/TrainingData/11.05-21.16.09 3.77118 
+pair_coeff		* * ../../TensorFlow/TrainingData/14.04-16.49.20 3.77118 
 
 # mass in grams/mole -> atom number
 mass            1 28.06
@@ -57,7 +57,8 @@ compute temperature all temp
 compute press all pressure temperature
 
 if "${dumpForces} == 1" then &
-	"dump forces all custom 1 Data/Forces/forces.txt id fx fy fz"
+	"dump forces all custom 1 Data/Forces/forces.txt id fx fy fz" &
+	"dump_modify forces sort id"
 
 if "${therm} == 1" then &
 	"fix therm all ave/time 1 1 1 c_temperature c_aveKe c_avePe c_press file Data/Thermo/thermo.txt"
