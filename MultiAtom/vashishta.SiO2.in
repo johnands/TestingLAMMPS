@@ -1,11 +1,11 @@
 variable dumpForces equal 0
-variable dumpNeigh equal 0
+variable dumpNeigh equal 1
 variable therm equal 0
 variable dumpxyz equal 0
 variable dumpConfigs equal 0
 
-variable initTemp equal 3000
-variable nSteps equal 10000
+variable initTemp equal 1000
+variable nSteps equal 0
 
 # test Vashishta potential for quartz
 
@@ -76,7 +76,7 @@ compute maxTripletsOSi O reduce max c_tripletsO[1]
 compute minTripletsOSi O reduce min c_tripletsO[1]
 compute aveTripletsOSi O reduce ave c_tripletsO[1]
 
-fix therm all ave/time 1 1 100 &
+#fix therm all ave/time 1 1 100 &
 	c_minPairsSiSi c_avePairsSiSi c_maxPairsSiSi &
 	c_minPairsSiO c_avePairsSiO c_maxPairsSiO &
 	c_minPairsOO c_avePairsOO c_maxPairsOO &

@@ -6,7 +6,7 @@ for all combinations of types
 import numpy as np
 import matplotlib.pyplot as plt
 
-filename = '../MultiAtom/Data/Coord/coordNumberT3000.txt'
+filename = '../MultiAtom/Data/Coord/coordNumberT2000.txt'
 coords = np.loadtxt(filename)
 
 timeSteps = coords[:,0]
