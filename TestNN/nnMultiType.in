@@ -1,0 +1,83 @@
+variable dumpForces equal 0
+variable therm equal 0
+variable dumpxyz equal 0
+variable pseudoSim equal 0
+
+variable initTemp equal 1000
+variable nSteps equal 0
+
+# test Vashishta potential for quartz
+
+units		metal
+boundary	p p p
+
+atom_style	atomic
+
+read_data	data.quartz
+
+replicate       4 4 4
+velocity	all create ${initTemp} 277387 mom yes
+displace_atoms	all move 0.05 0.9 0.4 units box
+
+pair_style		nn/multitype
+
+pair_coeff		* * ../../TensorFlow/TrainingData/15.05-17.40.58 &
+					../../TensorFlow/TrainingData/15.05-17.40.47 &
+					Si O &
+					5.5 
+
+neighbor		0.3 bin
+neigh_modify	delay 10
+
+# integrate if ordinary simulation
+if "${pseudoSim} == 0" then &
+	"fix 1 all nve"
+
+timestep	0.001
+
+# check neighbour stuff
+group Si type 1
+group O  type 2
+
+# dump thermodynamic properties
+compute peAtom all pe/atom
+compute avePe all reduce ave c_peAtom
+
+compute keAtom all ke/atom
+compute aveKe all reduce ave c_keAtom
+
+compute temperature all temp
+
+compute press all pressure temperature
+
+if "${therm} == 1" then &
+	"fix therm all ave/time 1 1 1 c_temperature c_aveKe c_avePe c_press file Data/Thermo/thermo.txt"
+
+# dump forces
+if "${dumpForces} == 1" then &
+	"dump forces all custom 1 Data/Forces/forces.txt id fx fy fz" &
+	"dump_modify forces sort id"
+
+# dump xyz-file
+if "${dumpxyz} == 1" then &
+	"dump stateFile2 all xyz 5 tmp/N${nSteps}Periodic.xyz"
+
+thermo_style custom step temp ke pe etotal press 
+thermo 100
+thermo_modify norm yes
+
+# pseudo simulation without integration or ordinary run
+if "${pseudoSim} == 1" then &
+	"rerun ../Silicon/Data/XYZData/Configs/L$LN${nSteps}.config &
+	dump x y z vx vy vz" &
+else &
+	"run ${nSteps}"	
+
+
+# make directory if sampling thermodynamics
+if "${therm} == 1" then &
+	"shell ./makeDirs/makeThermoDir.sh"
+
+# make directory if sampling forces
+if "${dumpForces} == 1" then &
+	"shell ./makeDirs/makeForcesDir.sh"
