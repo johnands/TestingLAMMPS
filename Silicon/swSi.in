@@ -105,7 +105,7 @@ if "${dumpxyz} == 1" then &
 	"dump stateFile2 all xyz 5 tmp/L$LN${nSteps}PeriodicSW.xyz"
 
 if "${dumpConfigs} == 1" then &
-	"dump configs all custom 1 Data/XYZData/Configs/L$LN${nSteps}.config &
+	"dump configs all custom 1 Data/XYZData/Configs/L$LN${nSteps}.txt &
 	id x y z vx vy vz"
 
 # sampling run

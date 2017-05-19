@@ -2,10 +2,11 @@ variable dumpForces equal 0
 variable dumpNeigh equal 0
 variable therm equal 0
 variable dumpxyz equal 0
-variable dumpConfigs equal 1
+variable dumpConfigs equal 0
 
 variable initTemp equal 1000
-variable nSteps equal 0
+variable writeThermo equal 100
+variable nSteps equal 10000
 
 # test Vashishta potential for quartz
 
@@ -14,7 +15,7 @@ boundary	p p p
 
 atom_style	atomic
 
-read_data	data.quartz
+read_data	DataFiles/data.quartz
 
 replicate       4 4 4
 velocity	all create ${initTemp} 277387 mom yes
@@ -31,7 +32,6 @@ neighbor		0.3 bin
 neigh_modify	delay 10
 
 fix			1 all nve
-thermo		10
 timestep	0.001
 
 # check neighbour stuff
@@ -76,7 +76,7 @@ compute maxTripletsOSi O reduce max c_tripletsO[1]
 compute minTripletsOSi O reduce min c_tripletsO[1]
 compute aveTripletsOSi O reduce ave c_tripletsO[1]
 
-#fix therm all ave/time 1 1 100 &
+fix therm all ave/time 1 1 100 &
 	c_minPairsSiSi c_avePairsSiSi c_maxPairsSiSi &
 	c_minPairsSiO c_avePairsSiO c_maxPairsSiO &
 	c_minPairsOO c_avePairsOO c_maxPairsOO &
@@ -86,6 +86,10 @@ compute aveTripletsOSi O reduce ave c_tripletsO[1]
 	c_minTripletsOO c_aveTripletsOO c_maxTripletsOO &
 	c_minTripletsOSi c_aveTripletsOSi c_maxTripletsOSi &
 	file Data/Coord/coordNumberT${initTemp}.txt
+
+#compute radialDist all rdf 50
+#fix radial all ave/time 100 10 1000 c_radialDist[*] file &
+#	Data/radialDist.txt mode vector
 
 # dump thermodynamic properties
 compute peAtom all pe/atom
@@ -101,7 +105,6 @@ compute press all pressure temperature
 if "${therm} == 1" then &
 	"fix therm all ave/time 1 1 1 c_temperature c_aveKe c_avePe c_press file Data/Thermo/thermo.txt"
 
-
 # dump forces
 if "${dumpForces} == 1" then &
 	"dump forces all custom 1 Data/Forces/forces.txt id fx fy fz" &
@@ -113,16 +116,15 @@ if "${dumpxyz} == 1" then &
 
 # dump configurations for rerun
 if "${dumpConfigs} == 1" then &
-	"dump configs all custom 1 Data/XYZData/Configs/LN${nSteps}.config &
+	"dump configs all custom 1 Data/XYZ/Configs/N${nSteps}.txt &
 	id x y z vx vy vz"
 
 
 thermo_style custom step temp ke pe etotal press 
-thermo 100
+thermo ${writeThermo}
 thermo_modify norm yes
 
 run		${nSteps}
-
 
 # make directory if sampling thermodynamics
 if "${therm} == 1" then &

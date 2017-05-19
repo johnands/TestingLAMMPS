@@ -73,11 +73,12 @@ compute temperature all temp
 compute press all pressure temperature
 
 if "${dumpForces} == 1" then &
-	"dump forces all custom 1 Data/Forces/forces.txt id fx fy fz" &
+	"dump forces all custom 1 Data/Si/Forces/forces.txt id fx fy fz" &
 	"dump_modify forces sort id"
 
 if "${therm} == 1" then &
-	"fix therm all ave/time 1 1 1 c_temperature c_aveKe c_avePe c_press file Data/Thermo/thermo.txt"
+	"fix therm all ave/time 1 1 1 c_temperature c_aveKe c_avePe c_press file &
+	Data/Si/Thermo/thermo.txt"
 
 # local computes like pair/local can be dumped with dump local
 # per-atom computes can be dumped with dump custom
@@ -97,7 +98,7 @@ if "${dumpxyz} == 1" then &
 
 # pseudo simulation without integration or ordinary run
 if "${pseudoSim} == 1" then &
-	"rerun ../Silicon/Data/XYZData/Configs/L$LN${nSteps}.config &
+	"rerun ../Silicon/Data/Si/XYZData/Configs/L$LN${nSteps}.config &
 	dump x y z vx vy vz" &
 else &
 	"run ${nSteps}"	
@@ -106,10 +107,10 @@ else &
 
 # make directory if sampling thermodynamics
 if "${therm} == 1" then &
-	"shell ./makeDirs/makeThermoDir.sh"
+	"shell ./makeDirs/makeThermoDirSi.sh"
 
 # make directory if sampling forces
 if "${dumpForces} == 1" then &
-	"shell ./makeDirs/makeForcesDir.sh"
+	"shell ./makeDirs/makeForcesDirSi.sh"
 
 

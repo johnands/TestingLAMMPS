@@ -23,6 +23,10 @@ sys.path.insert(1, grandParentDir)
 sys.path.insert(2, gGrandParentDir)
 
 import TensorFlow.DataGeneration.readers as readers
+
+sumOfForcesFlag = True
+plotDistFlag = False
+plotCoordsFlag = False
     
 def readForceFile(filename):
    
@@ -74,12 +78,8 @@ def readForceFile(filename):
     
 
 # read force files
-dirNameNN = '../TestNN/Data/Forces/4atomsN1e4Pseudo/'
-dirNameSW = '../Silicon/Data/Forces/4atomsN1e4/'
-
-# read neighbour file
-distSW = '../Silicon/Data/TrainingData/4atoms/T1e3N1e4/neighbours.txt'
-x, y, z, r, _ = readers.readNeighbourData(distSW)
+dirNameNN = '../TestNN/Data/SiO2/Forces/InitialConfigReplicate4/'
+dirNameSW = '../Quartz/Data/Forces/InitialConfigReplicate4/'
 
 # write out README files
 print "Content of SW folder:"
@@ -113,22 +113,23 @@ FySW = forcesSW[:,1]
 FzSW = forcesSW[:,2]
 
 # check that sum of forces is zero
-sumsNN = np.zeros((nTimeSteps, 3))
-sumsSW = np.zeros((nTimeSteps, 3))
-for i in xrange(nTimeSteps):
-    timeStep = numberOfAtoms*i
-    sumsNN[i][0] = np.sum(FxNN[timeStep:timeStep+numberOfAtoms])
-    sumsNN[i][1] = np.sum(FyNN[timeStep:timeStep+numberOfAtoms])
-    sumsNN[i][2] = np.sum(FzNN[timeStep:timeStep+numberOfAtoms])
-    sumsSW[i][0] = np.sum(FxSW[timeStep:timeStep+numberOfAtoms])
-    sumsSW[i][1] = np.sum(FySW[timeStep:timeStep+numberOfAtoms])
-    sumsSW[i][2] = np.sum(FzSW[timeStep:timeStep+numberOfAtoms])
-    
-if (sumsNN > 1e-4).any():
-    print "Sum of forces is not zero"
-    
-print "Max sum-of-forces NN: ", np.max(sumsNN)
-print "Max sum-of-forces SW: ", np.max(sumsSW)
+if sumOfForcesFlag:
+    sumsNN = np.zeros((nTimeSteps, 3))
+    sumsSW = np.zeros((nTimeSteps, 3))
+    for i in xrange(nTimeSteps):
+        timeStep = numberOfAtoms*i
+        sumsNN[i][0] = np.sum(FxNN[timeStep:timeStep+numberOfAtoms])
+        sumsNN[i][1] = np.sum(FyNN[timeStep:timeStep+numberOfAtoms])
+        sumsNN[i][2] = np.sum(FzNN[timeStep:timeStep+numberOfAtoms])
+        sumsSW[i][0] = np.sum(FxSW[timeStep:timeStep+numberOfAtoms])
+        sumsSW[i][1] = np.sum(FySW[timeStep:timeStep+numberOfAtoms])
+        sumsSW[i][2] = np.sum(FzSW[timeStep:timeStep+numberOfAtoms])
+        
+    if (sumsNN > 1e-4).any():
+        print "Sum of forces is not zero"
+        
+    print "Max sum-of-forces NN: ", np.max(sumsNN)
+    print "Max sum-of-forces SW: ", np.max(sumsSW)
     
 # choose one atom to plot forces and calculate errors
 chosenAtom = 0
@@ -149,29 +150,6 @@ yError = FyNN - FySW
 zError = FzNN - FzSW
 absError = Fnn - Fsw
 
-# calculate various properties of the chemical environment of the 
-# chosen atom as a function of time step
-rAverage = np.zeros(len(r))
-rMax = np.zeros(len(r))
-rMin = np.zeros(len(r))
-rStd = np.zeros(len(r))
-coordNumber = np.zeros(len(r))
-for i in xrange(len(r)):
-    ri = np.sqrt(np.array(r[i]))
-    rAverage[i] = np.average(ri)
-    rMax[i] = np.max(ri)
-    rMin[i] = np.min(ri)
-    rStd[i] = np.std(ri)
-    coordNumber[i] = len(ri)
-    
-plt.figure()
-plt.plot(timeStepsNN[0::10], coordNumber)
-plt.xlabel('Time step')
-plt.ylabel('Coordination number')
-plt.show()
-
-### investigate for correlations ###
-
 # plot error vs |F|
 errorVsForce = []
 forceValues = np.linspace(0, np.max(Fnn), 6)
@@ -184,64 +162,6 @@ plt.plot(forceValues[1:], errorVsForce)
 plt.xlabel('Absolute force NN')
 plt.ylabel('Error')
 plt.show()
-    
-# correlations with coordination number
-coordUnique = np.unique(coordNumber)
-print "Coordination numbers: ", coordUnique
-plt.figure()
-plt.hist(coordNumber, bins=4)
-plt.legend(['Coordination numbers'])
-
-# find error as function of coordination number
-errorVsCoords = []
-for coord in coordUnique:
-    indicies = np.where(coordNumber == coord)[0]
-    errorVsCoords.append(np.std(absError[indicies]))
-    
-plt.figure()
-plt.plot(coordUnique, errorVsCoords) 
-plt.xlabel('Coordination number')
-plt.ylabel('Error')
-plt.show()
-
-# correlations between std. dev. of distances and force error
-bottoms = np.where(rStd < 0.3)[0]
-tops = np.where(rStd > 0.3)[0]
-
-xBottoms = xError[bottoms]
-xTops = xError[tops]
-yBottoms = yError[bottoms]
-yTops = yError[tops]
-zBottoms = zError[bottoms]
-zTops = zError[tops]
-absBottoms = absError[bottoms]
-absTops = absError[tops]
-    
-# plots of environment variables
-plt.subplot(4,1,1)
-plt.plot(rAverage)
-plt.legend(['rAverage'])
-plt.subplot(4,1,2)
-plt.plot(rMax)
-plt.legend(['rMax'])
-plt.subplot(4,1,3)
-plt.plot(rMin)
-plt.legend(['rMin'])
-plt.subplot(4,1,4)
-plt.plot(rStd)
-plt.legend(['rStd'])
-plt.show()  
-#plt.savefig('tmp/dist.pdf')
-
-
-print "bottoms x: ", np.std(xBottoms)
-print "tops x: ", np.std(xTops)
-print "bottoms y: ", np.std(yBottoms)
-print "tops y: ", np.std(yTops)
-print "bottoms z: ", np.std(zBottoms)
-print "tops z: ", np.std(zTops)
-print "bottoms abs: ", np.std(absBottoms)
-print "tops abs: ", np.std(absTops)
 
 # output
 print "Average error Fx: ", np.average(xError)
@@ -259,6 +179,7 @@ print "Std. dev. error Fy: ", np.std(yError)
 print "Std. dev. error Fz: ", np.std(zError)
 print "Std. dev. error |F|: ", np.std(absError)
 
+# plot NN and SW forces plus the errors
 plt.subplot(4,2,1)
 plt.plot(timeStepsNN, FxNN, 'b-', timeStepsSW, FxSW, 'g-')
 plt.legend([r'$F_x^{NN}$', r'$F_x^{SW}$'])
@@ -295,11 +216,75 @@ plt.ylabel(r'$\Delta F$')
 
 plt.show()
 
-plt.figure()
-
 # plot histogram of forces
 plt.hist(Fsw)
 plt.xlabel('|F|')
 plt.ylabel('Number of forces')
 plt.show()
+
+
+# calculate various properties of the chemical environment of the 
+# chosen atom as a function of time step
+# read neighbour file
+if plotDistFlag or plotCoordsFlag:
+    distSW = '../Quartz/Data/TrainingData/Bulk/InitConfigReplicate4/neighbours.txt'
+    x, y, z, r, _ = readers.readNeighbourData(distSW)
+
+    rAverage = np.zeros(len(r))
+    rMax = np.zeros(len(r))
+    rMin = np.zeros(len(r))
+    rStd = np.zeros(len(r))
+    coordNumber = np.zeros(len(r))
+    for i in xrange(len(r)):
+        ri = np.sqrt(np.array(r[i]))
+        rAverage[i] = np.average(ri)
+        rMax[i] = np.max(ri)
+        rMin[i] = np.min(ri)
+        rStd[i] = np.std(ri)
+        coordNumber[i] = len(ri)
+    
+if plotDistFlag:    
+    # plots of environment variables
+    plt.subplot(4,1,1)
+    plt.plot(rAverage)
+    plt.legend(['rAverage'])
+    plt.subplot(4,1,2)
+    plt.plot(rMax)
+    plt.legend(['rMax'])
+    plt.subplot(4,1,3)
+    plt.plot(rMin)
+    plt.legend(['rMin'])
+    plt.subplot(4,1,4)
+    plt.plot(rStd)
+    plt.legend(['rStd'])
+    plt.show()  
+    #plt.savefig('tmp/dist.pdf')
+    
+if plotCoordsFlag:
+    plt.figure()
+    plt.plot(timeStepsNN[0::10], coordNumber)
+    plt.xlabel('Time step')
+    plt.ylabel('Coordination number')
+    plt.show()
+    
+    # correlations with coordination number
+    coordUnique = np.unique(coordNumber)
+    print "Coordination numbers: ", coordUnique
+    plt.figure()
+    plt.hist(coordNumber, bins=4)
+    plt.legend(['Coordination numbers'])
+
+    # find error as function of coordination number
+    errorVsCoords = []
+    for coord in coordUnique:
+        indicies = np.where(coordNumber == coord)[0]
+        errorVsCoords.append(np.std(absError[indicies]))
+        
+    plt.figure()
+    plt.plot(coordUnique, errorVsCoords) 
+    plt.xlabel('Coordination number')
+    plt.ylabel('Error')
+    plt.show()
+
+
 

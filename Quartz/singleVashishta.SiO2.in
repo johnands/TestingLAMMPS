@@ -1,12 +1,12 @@
 variable dumpForces equal 0
-variable dumpNeigh equal 0
+variable dumpNeigh equal 1
 variable therm equal 0
 variable dumpxyz equal 0
 variable dumpConfigs equal 0
 
 variable nAtoms equal 2
-variable initTemp equal 1000
-variable writeThermo equal 100
+variable initTemp equal 300
+variable writeThermo equal 1
 variable nSteps equal 10000
 
 # test Vashishta potential for quartz
@@ -16,24 +16,12 @@ boundary	p p p
 
 atom_style	atomic
 
-# tetrahedral structure: diamond
-# 5.431 is lattice constant in Angstrom
-variable 		L equal 5	
-region myBox block 0 ${L} 0 ${L} 0 ${L}
-create_box 1 myBox
-
 if "${nAtoms} == 2" then &
-	"create_atoms 1 single 10 10 10 units box" &
-	"create_atoms 1 single 12.5 10 10 units box"
+	"read_data DataFiles/data.quartz.2atoms"
 if "${nAtoms} == 3" then &
-	"create_atoms 1 single 10 10 10 units box" &
-	"create_atoms 1 single 12.5 10 10 units box" &
-	"create_atoms 1 single 11.25 12.5 10 units box"
+	"read_data DataFiles/data.quartz.3atoms"
 if "${nAtoms} == 4" then &
-	"create_atoms 1 single 10 10 10 units box" &
-	"create_atoms 1 single 12.5 10 10 units box" &
-	"create_atoms 1 single 11.25 12.5 10 units box" &
-	"create_atoms 1 single 11.25 11.25 12.5 units box"
+	"read_data DataFiles/data.quartz.4atoms"
 
 velocity	all create ${initTemp} 277387 mom yes
 
@@ -128,7 +116,7 @@ if "${dumpForces} == 1" then &
 
 # dump xyz-file
 if "${dumpxyz} == 1" then &
-	"dump stateFile2 all xyz 5 tmp/N${nSteps}Periodic.xyz"
+	"dump stateFile2 all xyz 10 tmp/N${nSteps}2atoms.xyz"
 
 # dump configurations for rerun
 if "${dumpConfigs} == 1" then &
@@ -152,4 +140,4 @@ if "${dumpForces} == 1" then &
 
 # make directory if sampling training data
 if "${dumpNeigh} == 1" then &
-	"shell ./makeDirs/makeTrainingDirBulk.sh"
+	"shell ./makeDirs/makeTrainingDir${nAtoms}.sh"

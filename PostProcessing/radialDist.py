@@ -1,7 +1,7 @@
 import numpy as np
 import matplotlib.pyplot as plt
 
-with open('../Silicon/Data/radialDist.dat', 'r') as inFile:
+with open('../Quartz/Data/radialDist.txt', 'r') as inFile:
 	
 	# skip lines
     for _ in range(3):
@@ -43,6 +43,7 @@ plt.show()
 
 nTimeSteps = len(timeSteps)
 
+# plot total time-averaged distribution
 timeAveragedDist = np.zeros(nBins)
 for i in xrange(nTimeSteps):
     for j in xrange(nBins): 

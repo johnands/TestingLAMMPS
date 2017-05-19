@@ -80,10 +80,10 @@ else &
 
 # make directory if sampling thermodynamics
 if "${therm} == 1" then &
-	"shell ./makeDirs/makeThermoDir.sh"
+	"shell ./makeDirs/makeThermoDirSi.sh"
 
 # make directory if sampling forces
 if "${dumpForces} == 1" then &
-	"shell ./makeDirs/makeForcesDir.sh"
+	"shell ./makeDirs/makeForcesDirSi.sh"
 
 
