@@ -5,7 +5,7 @@ variable dumpxyz equal 0
 variable dumpConfigs equal 0
 
 variable nAtoms equal 2
-variable initTemp equal 300
+variable initTemp equal 1000
 variable writeThermo equal 1
 variable nSteps equal 10000
 
@@ -37,59 +37,6 @@ neigh_modify	delay 10
 
 fix			1 all nve
 timestep	0.001
-
-# check neighbour stuff
-group Si type 1
-group O  type 2
-
-compute pairsSi 	Si coord/atom cutoff 5.5 1 2
-compute tripletsSi 	Si coord/atom cutoff 2.6 1 2
-
-compute pairsO 		O coord/atom cutoff 5.5 1 2
-compute tripletsO 	O coord/atom cutoff 2.6 1 2
-
-compute maxPairsSiSi Si reduce max c_pairsSi[1]
-compute minPairsSiSi Si reduce min c_pairsSi[1]
-compute avePairsSiSi Si reduce ave c_pairsSi[1]
-
-compute maxPairsSiO Si reduce max c_pairsSi[2]
-compute minPairsSiO Si reduce min c_pairsSi[2]
-compute avePairsSiO Si reduce ave c_pairsSi[2]
-
-compute maxPairsOO O reduce max c_pairsO[2]
-compute minPairsOO O reduce min c_pairsO[2]
-compute avePairsOO O reduce ave c_pairsO[2]
-
-compute maxPairsOSi O reduce max c_pairsO[1]
-compute minPairsOSi O reduce min c_pairsO[1]
-compute avePairsOSi O reduce ave c_pairsO[1]
-
-compute maxTripletsSiSi Si reduce max c_tripletsSi[1]
-compute minTripletsSiSi Si reduce min c_tripletsSi[1]
-compute aveTripletsSiSi Si reduce ave c_tripletsSi[1]
-
-compute maxTripletsSiO Si reduce max c_tripletsSi[2]
-compute minTripletsSiO Si reduce min c_tripletsSi[2]
-compute aveTripletsSiO Si reduce ave c_tripletsSi[2]
-
-compute maxTripletsOO O reduce max c_tripletsO[2]
-compute minTripletsOO O reduce min c_tripletsO[2]
-compute aveTripletsOO O reduce ave c_tripletsO[2]
-
-compute maxTripletsOSi O reduce max c_tripletsO[1]
-compute minTripletsOSi O reduce min c_tripletsO[1]
-compute aveTripletsOSi O reduce ave c_tripletsO[1]
-
-#fix therm all ave/time 1 1 100 &
-	c_minPairsSiSi c_avePairsSiSi c_maxPairsSiSi &
-	c_minPairsSiO c_avePairsSiO c_maxPairsSiO &
-	c_minPairsOO c_avePairsOO c_maxPairsOO &
-	c_minPairsOSi c_avePairsOSi c_maxPairsOSi &
-	c_minTripletsSiSi c_aveTripletsSiSi c_maxTripletsSiSi &
-	c_minTripletsSiO c_aveTripletsSiO c_maxTripletsSiO &
-	c_minTripletsOO c_aveTripletsOO c_maxTripletsOO &
-	c_minTripletsOSi c_aveTripletsOSi c_maxTripletsOSi &
-	file Data/Coord/coordNumberT${initTemp}.txt
 
 #compute radialDist all rdf 50
 #fix radial all ave/time 100 10 1000 c_radialDist[*] file &

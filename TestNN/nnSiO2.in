@@ -1,10 +1,11 @@
 variable dumpForces equal 1
 variable therm equal 0
 variable dumpxyz equal 0
-variable pseudoSim equal 0
+variable pseudoSim equal 1
 
+variable L equal 4
 variable initTemp equal 1000
-variable nSteps equal 100
+variable nSteps equal 40
 
 # test Vashishta potential for quartz
 
@@ -15,14 +16,14 @@ atom_style	atomic
 
 read_data	../Quartz/DataFiles/data.quartz
 
-replicate       4 4 4
+replicate       $L $L $L
 velocity	all create ${initTemp} 277387 mom yes
 displace_atoms	all move 0.05 0.9 0.4 units box
 
 pair_style		nn/multitype
 
-pair_coeff		* * ../../TensorFlow/TrainingData/15.05-17.40.58 &
-					../../TensorFlow/TrainingData/15.05-17.40.47 &
+pair_coeff		* * ../../TensorFlow/TrainingData/SiO2L4Type0NoZeros &
+					../../TensorFlow/TrainingData/SiO2L4Type1NoZeros &
 					Si O &
 					5.5 
 
@@ -56,20 +57,21 @@ if "${therm} == 1" then &
 
 # dump forces
 if "${dumpForces} == 1" then &
-	"dump forces all custom 1 Data/SiO2/Forces/forces.txt id fx fy fz" &
+	"group chosen id 307 309" &
+	"dump forces chosen custom 1 Data/SiO2/Forces/forces.txt id fx fy fz" &
 	"dump_modify forces sort id"
 
 # dump xyz-file
 if "${dumpxyz} == 1" then &
 	"dump stateFile2 all xyz 5 tmp/N${nSteps}Periodic.xyz"
 
-thermo_style custom step temp ke pe etotal press 
-thermo 100
+thermo_style custom step temp ke pe press etotal  
+thermo 1
 thermo_modify norm yes
 
 # pseudo simulation without integration or ordinary run
 if "${pseudoSim} == 1" then &
-	"rerun ../Quartz/Data/XYZ/Configs/LN${nSteps}.xyz &
+	"rerun ../Quartz/Data/XYZ/Configs/L$LN${nSteps}.txt &
 	dump x y z vx vy vz" &
 else &
 	"run ${nSteps}"	
