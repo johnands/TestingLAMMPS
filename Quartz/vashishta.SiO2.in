@@ -1,12 +1,12 @@
-variable dumpForces equal 1
+variable dumpForces equal 0
 variable dumpNeigh equal 0
-variable therm equal 0
+variable dumpTherm equal 0
 variable dumpxyz equal 0
 variable dumpConfigs equal 0
 
 variable initTemp equal 1000
 variable writeThermo equal 1
-variable nSteps equal 100
+variable nSteps equal 10
 
 # test Vashishta potential for quartz
 
@@ -49,7 +49,7 @@ compute temperature all temp
 
 compute press all pressure temperature
 
-if "${therm} == 1" then &
+if "${dumpTherm} == 1" then &
 	"fix therm all ave/time 1 1 1 c_temperature c_aveKe c_avePe c_press file Data/Thermo/thermo.txt"
 
 # dump forces
@@ -75,7 +75,7 @@ thermo_modify norm yes
 run		${nSteps}
 
 # make directory if sampling thermodynamics
-if "${therm} == 1" then &
+if "${dumpTherm} == 1" then &
 	"shell ./makeDirs/makeThermoDir.sh"
 
 # make directory if sampling forces

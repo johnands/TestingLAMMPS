@@ -104,7 +104,7 @@ fix		integration all nve
 ### output ###
 
 # print thermodynamic properties every 50 time steps
-thermo		50
+thermo		1
 thermo_style custom step temp density press ke pe etotal 
 thermo_modify norm yes
 
@@ -113,7 +113,7 @@ thermo_modify norm yes
 # write displacement to file, include periodic b.c. effects
 #dump diffusion all custom 100 Data/diffusion*.dat c_displacement[4]
 
-dump coords all custom 50 thermalized.xyz x y z vx vy vz
+#dump coords all custom 50 thermalized.xyz x y z vx vy vz
 
 # compute time averaged rdf every 100 time steps
 # 100 1 100: Nevery - Nrepeat - Nfreq means we calculate the time average for step multiples of Nfreq
@@ -121,8 +121,12 @@ dump coords all custom 50 thermalized.xyz x y z vx vy vz
 # mode vector: input is a vector
 #fix radial all ave/time 100 10 1000 c_radialDist[*] file Data/radialDist.dat mode vector
 
+group one id 307
+compute 2 all pair/local dist eng
+dump 1 one local 1 tmp.dump index c_2[1] c_2[2]
+
 # run for specified number of steps
-run		501
+run		10
 
 
 

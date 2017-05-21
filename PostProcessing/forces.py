@@ -78,8 +78,8 @@ def readForceFile(filename):
     
 
 # read force files
-dirNameNN = '../TestNN/Data/SiO2/Forces/InitialConfigReplicate4/'
-dirNameSW = '../Quartz/Data/Forces/InitialConfigReplicate4/'
+dirNameNN = '../TestNN/Data/SiO2/Forces/21.05-17.57.20/'
+dirNameSW = '../Quartz/Data/Forces/Atoms2N1e4/'
 
 # write out README files
 print "Content of SW folder:"

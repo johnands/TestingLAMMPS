@@ -1,13 +1,13 @@
 variable dumpForces equal 0
-variable dumpNeigh equal 1
-variable therm equal 0
+variable dumpNeigh equal 0
+variable dumpTherm equal 0
 variable dumpxyz equal 0
 variable dumpConfigs equal 0
 
 variable nAtoms equal 2
 variable initTemp equal 1000
 variable writeThermo equal 1
-variable nSteps equal 10000
+variable nSteps equal 10
 
 # test Vashishta potential for quartz
 
@@ -42,6 +42,8 @@ timestep	0.001
 #fix radial all ave/time 100 10 1000 c_radialDist[*] file &
 #	Data/radialDist.txt mode vector
 
+compute neighList all neigh
+
 # dump thermodynamic properties
 compute peAtom all pe/atom
 compute avePe all reduce ave c_peAtom
@@ -53,7 +55,7 @@ compute temperature all temp
 
 compute press all pressure temperature
 
-if "${therm} == 1" then &
+if "${dumpTherm} == 1" then &
 	"fix therm all ave/time 1 1 1 c_temperature c_aveKe c_avePe c_press file Data/Thermo/thermo.txt"
 
 # dump forces
@@ -67,7 +69,7 @@ if "${dumpxyz} == 1" then &
 
 # dump configurations for rerun
 if "${dumpConfigs} == 1" then &
-	"dump configs all custom 1 Data/XYZ/Configs/N${nSteps}.txt &
+	"dump configs all custom 1 Data/XYZ/Configs/${nAtoms}atomsN${nSteps}.txt &
 	id x y z vx vy vz"
 
 
@@ -78,7 +80,7 @@ thermo_modify norm yes
 run		${nSteps}
 
 # make directory if sampling thermodynamics
-if "${therm} == 1" then &
+if "${dumpTherm} == 1" then &
 	"shell ./makeDirs/makeThermoDir.sh"
 
 # make directory if sampling forces

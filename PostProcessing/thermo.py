@@ -35,8 +35,8 @@ def readFile(filename):
     return temperature, kineticEnergy, potentialEnergy, pressure
     
     
-dirNameNN = '../TestNN/Data/Thermo/21.04-19.44.13/'
-dirNameSW = '../Silicon/Data/Thermo/21.04-19.45.28/'
+dirNameNN = '../TestNN/Data/SiO2/Thermo/Atoms2N1e4NoZeros/'
+dirNameSW = '../Quartz/Data/Thermo/Atoms2N1e4/'
 
 # write out README files
 print "Content of SW folder:"

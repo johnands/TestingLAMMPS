@@ -1,0 +1,84 @@
+variable dumpForces equal 1
+variable dumpTherm equal 0
+variable dumpxyz equal 0
+variable pseudoSim equal 1
+
+variable nAtoms equal 2
+variable initTemp equal 1000
+variable nSteps equal 10000
+
+# test Vashishta potential for quartz
+
+units		metal
+boundary	p p p
+
+atom_style	atomic
+
+if "${nAtoms} == 2" then &
+	"read_data ../Quartz/DataFiles/data.quartz.2atoms"
+if "${nAtoms} == 3" then &
+	"read_data ../Quartz/DataFiles/data.quartz.3atoms"
+if "${nAtoms} == 4" then &
+	"read_data ../Quartz/DataFiles/data.quartz.4atoms"
+
+velocity	all create ${initTemp} 277387 mom yes
+
+pair_style		nn/multitype
+
+pair_coeff		* * ../../TensorFlow/TrainingData/SiO2Atoms2Type0OnlyG2 &
+					../../TensorFlow/TrainingData/SiO2Atoms2Type1OnlyG2 &
+					Si O &
+					5.5 
+
+neighbor		0.3 bin
+neigh_modify	delay 10
+
+# integrate if ordinary simulation
+if "${pseudoSim} == 0" then &
+	"fix 1 all nve"
+
+timestep	0.001
+
+# dump thermodynamic properties
+compute peAtom all pe/atom
+compute avePe all reduce ave c_peAtom
+
+compute keAtom all ke/atom
+compute aveKe all reduce ave c_keAtom
+
+compute temperature all temp
+
+compute press all pressure temperature
+
+if "${dumpTherm} == 1" then &
+	"fix therm all ave/time 1 1 1 c_temperature c_aveKe c_avePe c_press file &
+	Data/SiO2/Thermo/thermo.txt"
+
+# dump forces
+if "${dumpForces} == 1" then &
+	"dump forces all custom 1 Data/SiO2/Forces/forces.txt id fx fy fz" &
+	"dump_modify forces sort id"
+
+# dump xyz-file
+if "${dumpxyz} == 1" then &
+	"dump stateFile2 all xyz 5 tmp/N${nSteps}Periodic.xyz"
+
+thermo_style custom step temp ke pe etotal  
+thermo 1
+thermo_modify norm yes
+
+# pseudo simulation without integration or ordinary run
+if "${pseudoSim} == 1" then &
+	"rerun ../Quartz/Data/XYZ/Configs/${nAtoms}atomsN10000.txt stop ${nSteps} &
+	dump x y z vx vy vz" &
+else &
+	"run ${nSteps}"	
+
+
+# make directory if sampling thermodynamics
+if "${dumpTherm} == 1" then &
+	"shell ./makeDirs/makeThermoDirSiO2.sh"
+
+# make directory if sampling forces
+if "${dumpForces} == 1" then &
+	"shell ./makeDirs/makeForcesDirSiO2.sh"
