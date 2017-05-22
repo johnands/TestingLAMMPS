@@ -121,10 +121,6 @@ thermo_modify norm yes
 # mode vector: input is a vector
 #fix radial all ave/time 100 10 1000 c_radialDist[*] file Data/radialDist.dat mode vector
 
-group one id 307
-compute 2 all pair/local dist eng
-dump 1 one local 1 tmp.dump index c_2[1] c_2[2]
-
 # run for specified number of steps
 run		10
 

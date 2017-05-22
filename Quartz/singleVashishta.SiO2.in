@@ -1,10 +1,10 @@
 variable dumpForces equal 0
-variable dumpNeigh equal 0
+variable dumpNeigh equal 1
 variable dumpTherm equal 0
 variable dumpxyz equal 0
 variable dumpConfigs equal 0
 
-variable nAtoms equal 2
+variable nAtoms equal 3
 variable initTemp equal 1000
 variable writeThermo equal 1
 variable nSteps equal 10
@@ -42,7 +42,7 @@ timestep	0.001
 #fix radial all ave/time 100 10 1000 c_radialDist[*] file &
 #	Data/radialDist.txt mode vector
 
-compute neighList all neigh
+#compute neighList all neigh
 
 # dump thermodynamic properties
 compute peAtom all pe/atom
@@ -73,7 +73,7 @@ if "${dumpConfigs} == 1" then &
 	id x y z vx vy vz"
 
 
-thermo_style custom step temp ke pe etotal press 
+thermo_style custom step temp ke c_avePe pe etotal press 
 thermo ${writeThermo}
 thermo_modify norm yes
 

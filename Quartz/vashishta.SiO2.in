@@ -1,12 +1,13 @@
-variable dumpForces equal 0
+variable dumpForces equal 1
 variable dumpNeigh equal 0
 variable dumpTherm equal 0
 variable dumpxyz equal 0
 variable dumpConfigs equal 0
 
+variable L equal 1
 variable initTemp equal 1000
 variable writeThermo equal 1
-variable nSteps equal 10
+variable nSteps equal 1000
 
 # test Vashishta potential for quartz
 
@@ -17,9 +18,13 @@ atom_style	atomic
 
 read_data	DataFiles/data.quartz
 
-replicate       4 4 4
+replicate       $L $L $L
 velocity	all create ${initTemp} 277387 mom yes
 displace_atoms	all move 0.05 0.9 0.4 units box
+
+#change_box all x delta -50 50
+#change_box all y delta -50 50
+#change_box all z delta -50 50
 
 if "${dumpNeigh} == 1" then &
 	"pair_style 	myvashishta" &
@@ -38,6 +43,9 @@ timestep	0.001
 #fix radial all ave/time 100 10 1000 c_radialDist[*] file &
 #	Data/radialDist.txt mode vector
 
+compute neighList all neigh
+fix dumpNeigh all ave/time 1 1 1 c_neighList file tmp/tmp.dump
+
 # dump thermodynamic properties
 compute peAtom all pe/atom
 compute avePe all reduce ave c_peAtom
@@ -49,14 +57,16 @@ compute temperature all temp
 
 compute press all pressure temperature
 
+group chosen id 308 310
+
 if "${dumpTherm} == 1" then &
 	"fix therm all ave/time 1 1 1 c_temperature c_aveKe c_avePe c_press file Data/Thermo/thermo.txt"
 
 # dump forces
 if "${dumpForces} == 1" then &
-	"group chosen id 307 309" &
 	"dump forces chosen custom 1 Data/Forces/forces.txt id fx fy fz" &
 	"dump_modify forces sort id"
+#dump_modify forces format line "%d %1.16g %1.16g %1.16g"
 
 # dump xyz-file
 if "${dumpxyz} == 1" then &
