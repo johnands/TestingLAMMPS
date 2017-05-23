@@ -1,13 +1,13 @@
-variable dumpForces equal 1
-variable dumpNeigh equal 0
+variable dumpForces equal 0
+variable dumpNeigh equal 1
 variable dumpTherm equal 0
 variable dumpxyz equal 0
 variable dumpConfigs equal 0
 
-variable L equal 1
+variable L equal 4
 variable initTemp equal 1000
 variable writeThermo equal 1
-variable nSteps equal 1000
+variable nSteps equal 10000
 
 # test Vashishta potential for quartz
 
@@ -57,11 +57,10 @@ compute temperature all temp
 
 compute press all pressure temperature
 
-group chosen id 308 310
-
 if "${dumpTherm} == 1" then &
 	"fix therm all ave/time 1 1 1 c_temperature c_aveKe c_avePe c_press file Data/Thermo/thermo.txt"
 
+group chosen id 308 310
 # dump forces
 if "${dumpForces} == 1" then &
 	"dump forces chosen custom 1 Data/Forces/forces.txt id fx fy fz" &

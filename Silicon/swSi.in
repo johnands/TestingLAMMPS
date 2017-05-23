@@ -1,12 +1,13 @@
-variable dumpForces equal 0
+variable dumpForces equal 1
 variable dumpNeigh equal 0
 variable therm equal 0
 variable dumpxyz equal 0
 variable dumpConfigs equal 0
 
-variable L equal 1
+variable writeThermo equal 100
+variable L equal 10
 variable initTemp equal 1000
-variable nSteps equal 10
+variable nSteps equal 1000
 
 # bulk Si via Stillinger-Weber
 
@@ -75,8 +76,9 @@ compute press all pressure temperature
 #dump diffusion all custom 1 tmp/diffusion.txt id c_displacement[1] &
 #c_displacement[2] c_displacement[3] c_displacement[4]
 
+group chosen id 1000 2000
 if "${dumpForces} == 1" then &
-	"dump forces all custom 1 Data/Forces/forces.txt id fx fy fz" &
+	"dump forces chosen custom 1 Data/Forces/forces.txt id fx fy fz" &
 	"dump_modify forces sort id"
 
 if "${therm} == 1" then &
@@ -98,7 +100,7 @@ if "${therm} == 1" then &
 # per-atom computes can be dumped with dump custom
 # global computes like minDist must be dumped with thermo custom
 thermo_style custom step temp ke pe c_avePe etotal  
-thermo 1
+thermo ${writeThermo}
 thermo_modify norm yes
 
 if "${dumpxyz} == 1" then &
