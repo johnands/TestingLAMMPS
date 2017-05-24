@@ -43,8 +43,9 @@ timestep	0.001
 #fix radial all ave/time 100 10 1000 c_radialDist[*] file &
 #	Data/radialDist.txt mode vector
 
-compute neighList all neigh
-fix dumpNeigh all ave/time 1 1 1 c_neighList file tmp/tmp.dump
+if "${dumpNeigh} == 1" then &
+	"compute neighList all neigh 3.0 2.0 50" &
+	"fix dumpNeigh all ave/time 1 1 1 c_neighList file tmp/tmp.dump"
 
 # dump thermodynamic properties
 compute peAtom all pe/atom
@@ -63,13 +64,13 @@ if "${dumpTherm} == 1" then &
 group chosen id 308 310
 # dump forces
 if "${dumpForces} == 1" then &
-	"dump forces chosen custom 1 Data/Forces/forces.txt id fx fy fz" &
+	"dump forces all custom 1 Data/Forces/forces.txt id fx fy fz" &
 	"dump_modify forces sort id"
 #dump_modify forces format line "%d %1.16g %1.16g %1.16g"
 
 # dump xyz-file
 if "${dumpxyz} == 1" then &
-	"dump stateFile2 all xyz 5 tmp/N${nSteps}Periodic.xyz"
+	"dump stateFile2 all xyz 10 Data/XYZ/L$LT${initTemp}N${nSteps}Periodic.xyz"
 
 # dump configurations for rerun
 if "${dumpConfigs} == 1" then &

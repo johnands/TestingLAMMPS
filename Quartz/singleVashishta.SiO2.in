@@ -1,13 +1,13 @@
 variable dumpForces equal 0
-variable dumpNeigh equal 1
+variable dumpNeigh equal 0
 variable dumpTherm equal 0
-variable dumpxyz equal 0
+variable dumpxyz equal 1
 variable dumpConfigs equal 0
 
-variable nAtoms equal 3
+variable nAtoms equal 2
 variable initTemp equal 1000
 variable writeThermo equal 1
-variable nSteps equal 10
+variable nSteps equal 10000
 
 # test Vashishta potential for quartz
 
@@ -42,7 +42,9 @@ timestep	0.001
 #fix radial all ave/time 100 10 1000 c_radialDist[*] file &
 #	Data/radialDist.txt mode vector
 
-#compute neighList all neigh
+if "${dumpNeigh} == 1" then &
+	"compute neighList all neigh 4.5 4.5 10" &
+	"fix dumpNeigh all ave/time 1 1 1 c_neighList file tmp/tmp.dump"
 
 # dump thermodynamic properties
 compute peAtom all pe/atom
@@ -65,7 +67,7 @@ if "${dumpForces} == 1" then &
 
 # dump xyz-file
 if "${dumpxyz} == 1" then &
-	"dump stateFile2 all xyz 10 tmp/N${nSteps}2atoms.xyz"
+	"dump stateFile2 all xyz 10 Data/XYZ/T${initTemp}N${nSteps}${nAtoms}atomsOO.xyz"
 
 # dump configurations for rerun
 if "${dumpConfigs} == 1" then &

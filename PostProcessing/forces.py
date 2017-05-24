@@ -93,8 +93,8 @@ def readStep(filename, atom):
         for line in infile:
             words = line.split()
             if int(words[0]) == atom:
-                steps.append(int(words[atom]))
-                 
+                steps.append(int(words[1]))
+                                 
     return np.array(steps)
                
         
@@ -345,14 +345,8 @@ class AnalyzeForces:
         if tauFile:
             tau = readTau(tauFile, chosenAtom)
             
-            plt.plot(timeSteps, tau)
-            plt.legend(['Type %d' % chosenAtom])
-            plt.title('Sampling time interval')
-            plt.draw()
-            raw_input('Press to continue: ')
-            
         if plotHist:
-            n, bins, patches = plt.hist(Ftarget, nBins, normed=1)
+            n, bins, patches = plt.hist(Ftarget, nBins)
             plt.xlabel('|F|')
             plt.ylabel('Number of forces')
             plt.legend(['Without sampling algorithm'])
@@ -362,10 +356,9 @@ class AnalyzeForces:
             # get indicies where sampled
             if stepFile:
                 steps = readStep(stepFile, chosenAtom)
-                print len(steps)
 
                 # plot distribution of forces with sampling algorithm               
-                n2, bins, patches = plt.hist(Ftarget[steps], nBins, normed=1)
+                n2, bins, patches = plt.hist(Ftarget[steps], nBins)
                 plt.xlabel('|F|')
                 plt.ylabel('Number of forces')
                 plt.legend(['With sampling algorithm'])
@@ -373,31 +366,60 @@ class AnalyzeForces:
                 raw_input('Press to continue: ')
                 
                 binCenters = (bins[1:] + bins[:-1]) / 2
-                plt.plot(binCenters, n, ls='steps')
-                plt.plot(binCenters, n2, ls='steps')
+                plt.plot(binCenters, n/max(n), ls='steps') 
+                plt.plot(binCenters, n2/max(n2), ls='steps', linewidth=2)
+                plt.legend(['Without sampling algorithm', 'With sampling algorithm'])
+                plt.title('Normed')
                 plt.draw()
                 raw_input('Press to continue: ')
             
+                plt.plot(binCenters, n, ls='steps') 
+                plt.plot(binCenters, n2, ls='steps', linewidth=2)
+                plt.legend(['Without sampling algorithm', 'With sampling algorithm'])
+                plt.title('Not normed')
+                plt.draw()
+                raw_input('Press to continue: ')
+                
         if plotForceVsTime:
-            plt.plot(timeSteps, Ftarget, 'b-', timeSteps, tau, 'g-')
-            plt.legend(['|F|', 'tau type %d' % chosenAtom])
-            plt.xlabel('Time step')
-            plt.draw()
-            raw_input('Press to continue: ')
+            if tauFile:
+                plt.plot(timeSteps, Ftarget, 'b-', timeSteps, tau, 'g-')
+                plt.legend(['|F|', 'tau type %d' % chosenAtom])
+                plt.xlabel('Time step')
+                plt.draw()
+                raw_input('Press to continue: ')
+            else:
+                plt.plot(timeSteps, Ftarget, 'b-')
+                plt.xlabel('Time step')
+                plt.ylabel('|F|')     
+                plt.draw()
+                raw_input('Press to continue: ')
             
         print "Average |F|: ",   np.mean(Ftarget)
         print "Max |F|: ",       np.max(Ftarget)
         print "Min |F|: ",       np.min(Ftarget)
         print "Std. dev. |F|: ", np.std(Ftarget)
+        print "Counts: ", n
+        
+        if stepFile:
+            # update class member
+            self.Ftarget = Ftarget[steps]
+            
+            print
+            print "With sampling algo:"
+            print "Average |F|: ",   np.mean(self.Ftarget)
+            print "Max |F|: ",       np.max(self.Ftarget)
+            print "Min |F|: ",       np.min(self.Ftarget)
+            print "Std. dev. |F|: ", np.std(self.Ftarget)
+            print "Counts: ", n2
         
     
     def transformDistribution(self, nBins=7):
         
         Ftarget = self.Ftarget
 
-        n, bins, patches = plt.hist(Ftarget, nBins, normed=1, fill=False)
+        n, bins, patches = plt.hist(Ftarget, nBins, fill=False)
         n = np.array(n)
-        nMin = 100 #np.min(n)
+        nMin = n[-3]
         deletes = n - nMin
         indiciesDeleted = []
         for i in xrange(len(n)):
@@ -409,7 +431,7 @@ class AnalyzeForces:
         indiciesDeleted = [item for sublist in indiciesDeleted for item in sublist]
         Ftarget = np.delete(Ftarget, indiciesDeleted)
             
-        n2, bins2, patches2 = plt.hist(Ftarget, nBins, normed=1, fill=False)
+        n2, bins2, patches2 = plt.hist(Ftarget, nBins, fill=False)
         plt.draw()
         raw_input('Press to continue: ')
         
@@ -420,6 +442,14 @@ class AnalyzeForces:
         plt.plot(binCenters, n2, ls='steps')
         plt.draw()
         raw_input('Press to continue: ')
+        
+        print
+        print "After tranformation:"
+        print "Average |F|: ",   np.mean(Ftarget)
+        print "Max |F|: ",       np.max(Ftarget)
+        print "Min |F|: ",       np.min(Ftarget)
+        print "Std. dev. |F|: ", np.std(Ftarget)
+        print "Counts: ", n2
     
         
 
@@ -498,17 +528,17 @@ plt.ion()
 dirNameNN       = '../TestNN/Data/Si/Forces/4atomsN1e4Pseudo/'
 dirNameTarget   = '../Quartz/Data/Forces/L4T1000N1e4TwoChosenAtoms/'
 
-tauFile         = '../Quartz/tmp/tau4.0.txt'
-stepFile        = '../Quartz/tmp/step4.0.txt'
+tauFile         = '../Quartz/tmp/tau3.0-2.0.txt'
+stepFile        = '../Quartz/tmp/step3.0-2.0.txt'
 
 neighbourFile   = '../Quartz/Data/TrainingData/Bulk/InitConfigReplicate4/neighbours.txt'
 
-analyze = AnalyzeForces(dirNameTarget=dirNameTarget, chosenAtom=1)
+analyze = AnalyzeForces(dirNameTarget=dirNameTarget, chosenAtom=0)
 analyze.visualizeSampling(stepFile=stepFile, 
                           tauFile=tauFile, 
                           plotHist=True, nBins=7,
-                          plotForceVsTime=True)
-#analyze.transformDistribution(nBins=7)
+                          plotForceVsTime=False)
+analyze.transformDistribution(nBins=7)
 #analyze.forceError()
               
 

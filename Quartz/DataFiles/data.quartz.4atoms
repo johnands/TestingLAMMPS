@@ -1,6 +1,6 @@
 # SiO2 alpha quartz 
 
-     2  atoms
+     4  atoms
      2  atom types
 
 0 25 xlo xhi
@@ -14,6 +14,8 @@ Masses
 
 Atoms
 
-       1        2          10 10 10  
+       1        1          10 10 10  
        2        2          12.5 10 10 
+       3		2		   11.25 12.5 10
+       4		2		   11.25 11.25 12.5
 
