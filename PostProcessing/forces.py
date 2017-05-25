@@ -97,6 +97,24 @@ def readStep(filename, atom):
                                  
     return np.array(steps)
                
+               
+def writeNeighbourData(filename, x, y, z, r, E, types=None):
+    
+    print 'Writing to file:', filename
+    
+    with open(filename, 'w') as outfile:
+        
+        for i in xrange(len(x)):
+            for j in xrange(len(x[i])):
+                if types is not None:
+                    outStr = '%.16g %.16g %.16g %.16g %d ' % (x[i][j], y[i][j], z[i][j], r[i][j], types[i][j])
+                else:
+                    outStr = '%.16g %.16g %.16g %.16g ' % (x[i][j], y[i][j], z[i][j], r[i][j])
+                outfile.write(outStr)
+            outfile.write('%.16g' % E[i][0])
+            outfile.write('\n')
+                
+        
         
         
 
@@ -413,13 +431,14 @@ class AnalyzeForces:
             print "Counts: ", n2
         
     
-    def transformDistribution(self, nBins=7):
+    def transformDistribution(self, nBins=7, write=False, neighbourDir=''):
         
         Ftarget = self.Ftarget
+        chosenAtom = self.chosenAtom
 
         n, bins, patches = plt.hist(Ftarget, nBins, fill=False)
         n = np.array(n)
-        nMin = n[-3]
+        nMin = n[-4]
         deletes = n - nMin
         indiciesDeleted = []
         for i in xrange(len(n)):
@@ -430,7 +449,9 @@ class AnalyzeForces:
             
         indiciesDeleted = [item for sublist in indiciesDeleted for item in sublist]
         Ftarget = np.delete(Ftarget, indiciesDeleted)
-            
+        
+        print 'Number of deleted neighbour lists: ', len(indiciesDeleted)        
+        
         n2, bins2, patches2 = plt.hist(Ftarget, nBins, fill=False)
         plt.draw()
         raw_input('Press to continue: ')
@@ -450,6 +471,22 @@ class AnalyzeForces:
         print "Min |F|: ",       np.min(Ftarget)
         print "Std. dev. |F|: ", np.std(Ftarget)
         print "Counts: ", n2
+        
+        # make new stripped data set
+        if write:
+            neighbourFile = neighbourDir + '/neighbours%d.txt' % chosenAtom
+            print 'Reading data file', neighbourFile
+            x, y, z, r, types, E = readers.readNeighbourDataMultiType(neighbourFile)
+            
+            x     = np.delete(x, indiciesDeleted, axis=0)
+            y     = np.delete(y, indiciesDeleted, axis=0)
+            z     = np.delete(z, indiciesDeleted, axis=0)
+            r     = np.delete(r, indiciesDeleted, axis=0)
+            types = np.delete(types, indiciesDeleted, axis=0)
+            E     = np.delete(E, indiciesDeleted, axis=0)
+            
+            writeName = neighbourDir + '/neighbours%dFlattened.txt' % chosenAtom
+            writeNeighbourData(writeName, x, y, z, r, E, types=types)
     
         
 
@@ -525,21 +562,27 @@ class AnalyzeForces:
 plt.ion() 
 
 # read force files
-dirNameNN       = '../TestNN/Data/Si/Forces/4atomsN1e4Pseudo/'
-dirNameTarget   = '../Quartz/Data/Forces/L4T1000N1e4TwoChosenAtoms/'
+dirNameNN       = '../TestNN/Data/SiO2/Forces/Atoms2N1e4/'
+dirNameTarget   = '../Quartz/Data/Forces/Atoms2T300N1e4/'
 
-tauFile         = '../Quartz/tmp/tau3.0-2.0.txt'
-stepFile        = '../Quartz/tmp/step3.0-2.0.txt'
+tauFile         = '../Quartz/tmp/tau2.0-2.0.txt'
+stepFile        = '../Quartz/tmp/step2.0-2.0.txt'
 
-neighbourFile   = '../Quartz/Data/TrainingData/Bulk/InitConfigReplicate4/neighbours.txt'
+neighbourDir   = '../Quartz/Data/TrainingData/Bulk/L4T1000N1e4Algo'
 
-analyze = AnalyzeForces(dirNameTarget=dirNameTarget, chosenAtom=0)
-analyze.visualizeSampling(stepFile=stepFile, 
-                          tauFile=tauFile, 
-                          plotHist=True, nBins=7,
-                          plotForceVsTime=False)
-analyze.transformDistribution(nBins=7)
-#analyze.forceError()
+chosenAtom = 0
+includeNN = True
+
+if includeNN:
+    analyze = AnalyzeForces(dirNameNN=dirNameNN, dirNameTarget=dirNameTarget, chosenAtom=chosenAtom)
+    analyze.forceError()
+else: 
+    analyze = AnalyzeForces(dirNameTarget=dirNameTarget, chosenAtom=chosenAtom)
+    analyze.visualizeSampling(stepFile=stepFile, 
+                              tauFile=tauFile, 
+                              plotHist=True, nBins=7,
+                              plotForceVsTime=False)
+    analyze.transformDistribution(nBins=7, write=False, neighbourDir=neighbourDir)
               
 
 

@@ -5,7 +5,7 @@ variable pseudoSim equal 1
 
 variable L equal 4
 variable initTemp equal 1000
-variable nSteps equal 40
+variable nSteps equal 100
 
 # test Vashishta potential for quartz
 
@@ -22,8 +22,8 @@ displace_atoms	all move 0.05 0.9 0.4 units box
 
 pair_style		nn/multitype
 
-pair_coeff		* * ../../TensorFlow/TrainingData/SiO2L4Type0NoZeros &
-					../../TensorFlow/TrainingData/SiO2L4Type1NoZeros &
+pair_coeff		* * ../../TensorFlow/TrainingData/SiO2L4Type0NoZerosNoAlgo &
+					../../TensorFlow/TrainingData/SiO2L4Type1NoZerosNoAlgo &
 					Si O &
 					5.5 
 
@@ -57,7 +57,7 @@ if "${therm} == 1" then &
 
 # dump forces
 if "${dumpForces} == 1" then &
-	"group chosen id 307 309" &
+	"group chosen id 308 310" &
 	"dump forces chosen custom 1 Data/SiO2/Forces/forces.txt id fx fy fz" &
 	"dump_modify forces sort id"
 
@@ -71,7 +71,7 @@ thermo_modify norm yes
 
 # pseudo simulation without integration or ordinary run
 if "${pseudoSim} == 1" then &
-	"rerun ../Quartz/Data/XYZ/Configs/L$LN${nSteps}.txt &
+	"rerun ../Quartz/Data/XYZ/Configs/L$LT${initTemp}N${nSteps}.txt stop ${nSteps} &
 	dump x y z vx vy vz" &
 else &
 	"run ${nSteps}"	
