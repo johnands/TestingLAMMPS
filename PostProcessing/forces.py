@@ -562,19 +562,20 @@ class AnalyzeForces:
 plt.ion() 
 
 # read force files
-dirNameNN       = '../TestNN/Data/SiO2/Forces/Atoms2N1e4/'
-dirNameTarget   = '../Quartz/Data/Forces/Atoms2T300N1e4/'
+dirNameNN       = '../TestNN/Data/SiO2/Forces/26.05-19.19.56/'
+dirNameTarget   = '../Quartz/Data/Forces/L1T1000N1000NoAlgoNonPeriodic/'
 
 tauFile         = '../Quartz/tmp/tau2.0-2.0.txt'
 stepFile        = '../Quartz/tmp/step2.0-2.0.txt'
 
 neighbourDir   = '../Quartz/Data/TrainingData/Bulk/L4T1000N1e4Algo'
 
-chosenAtom = 0
+chosenAtom = 1
 includeNN = True
 
 if includeNN:
     analyze = AnalyzeForces(dirNameNN=dirNameNN, dirNameTarget=dirNameTarget, chosenAtom=chosenAtom)
+    analyze.sumOfForces()
     analyze.forceError()
 else: 
     analyze = AnalyzeForces(dirNameTarget=dirNameTarget, chosenAtom=chosenAtom)

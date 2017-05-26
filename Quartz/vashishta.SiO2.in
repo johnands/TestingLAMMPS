@@ -1,13 +1,13 @@
-variable dumpForces equal 0
-variable dumpNeigh equal 1
+variable dumpForces equal 1
+variable dumpNeigh equal 0
 variable dumpTherm equal 0
 variable dumpxyz equal 0
-variable dumpConfigs equal 1
+variable dumpConfigs equal 0
 
-variable L equal 4
+variable L equal 1
 variable initTemp equal 1000
 variable writeThermo equal 1
-variable nSteps equal 100
+variable nSteps equal 1000
 
 # test Vashishta potential for quartz
 
@@ -19,12 +19,12 @@ atom_style	atomic
 read_data	DataFiles/data.quartz
 
 replicate       $L $L $L
-velocity	all create ${initTemp} 277387 mom yes
+velocity		all create ${initTemp} 277387 mom yes
 displace_atoms	all move 0.05 0.9 0.4 units box
 
-#change_box all x delta -50 50
-#change_box all y delta -50 50
-#change_box all z delta -50 50
+change_box all x delta -50 50
+change_box all y delta -50 50
+change_box all z delta -50 50
 
 if "${dumpNeigh} == 1" then &
 	"pair_style 	myvashishta" &
@@ -45,7 +45,7 @@ timestep	0.001
 
 # dump neighbours arguments: alpha1 (alpha2) maxFactor useAlgo
 if "${dumpNeigh} == 1" then &
-	"compute neighList all neigh 2.0 1.5 50 1" &
+	"compute neighList all neigh 2.0 1.5 50 0" &
 	"fix dumpNeigh all ave/time 1 1 1 c_neighList file tmp/tmp.dump"
 
 # dump thermodynamic properties
@@ -75,7 +75,7 @@ if "${dumpxyz} == 1" then &
 
 # dump configurations for rerun
 if "${dumpConfigs} == 1" then &
-	"dump configs all custom 1 Data/XYZ/Configs/L$LT${initTemp}N${nSteps}.txt &
+	"dump configs all custom 1 Data/XYZ/Configs/L$LT${initTemp}N${nSteps}NP.txt &
 	id x y z vx vy vz"
 
 
