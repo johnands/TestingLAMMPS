@@ -1,10 +1,10 @@
-variable dumpForces equal 1
+variable dumpForces equal 0
 variable dumpNeigh equal 0
-variable dumpTherm equal 0
+variable dumpTherm equal 1
 variable dumpxyz equal 0
 variable dumpConfigs equal 0
 
-variable L equal 1
+variable L equal 4
 variable initTemp equal 1000
 variable writeThermo equal 1
 variable nSteps equal 1000
@@ -22,9 +22,9 @@ replicate       $L $L $L
 velocity		all create ${initTemp} 277387 mom yes
 displace_atoms	all move 0.05 0.9 0.4 units box
 
-change_box all x delta -50 50
-change_box all y delta -50 50
-change_box all z delta -50 50
+#change_box all x delta -50 50
+#change_box all y delta -50 50
+#change_box all z delta -50 50
 
 if "${dumpNeigh} == 1" then &
 	"pair_style 	myvashishta" &
