@@ -12,6 +12,7 @@ Analyze forces dumped with LAMMPS:
 
 import numpy as np
 import matplotlib.pyplot as plt
+from cycler import cycler
 
 import os, sys, inspect
 currentdir = os.path.dirname(os.path.abspath(inspect.getfile(inspect.currentframe())))
@@ -353,7 +354,7 @@ class AnalyzeForces:
             
     
     def visualizeSampling(self, tauFile='', stepFile='', plotHist=True, plotForceVsTime=True,
-                          nBins=10):
+                          nBins=10, chosenID=None):
         
         timeSteps   = self.timeSteps
         Ftarget     = self.Ftarget
@@ -373,7 +374,10 @@ class AnalyzeForces:
             
             # get indicies where sampled
             if stepFile:
-                steps = readStep(stepFile, chosenAtom)
+                if chosenID is not None:
+                    steps = readStep(stepFile, chosenID)
+                else:
+                    steps = readStep(stepFile, chosenAtom)
 
                 # plot distribution of forces with sampling algorithm               
                 n2, bins, patches = plt.hist(Ftarget[steps], nBins)
@@ -386,16 +390,24 @@ class AnalyzeForces:
                 binCenters = (bins[1:] + bins[:-1]) / 2
                 plt.plot(binCenters, n/max(n), ls='steps') 
                 plt.plot(binCenters, n2/max(n2), ls='steps', linewidth=2)
-                plt.legend(['Without sampling algorithm', 'With sampling algorithm'])
-                plt.title('Normed')
-                plt.draw()
+                plt.legend(['Without sampling algorithm', 'With sampling algorithm'], prop={'size':15})
+                #plt.title('Normed')
+                plt.xlabel(r'$|F_i|$')
+                plt.ylabel('Normalized force counts')
+                plt.tight_layout()
+                plt.savefig('tmp/forceDistSamplingAlgoNormed.pdf')
+                #plt.draw()
                 raw_input('Press to continue: ')
             
                 plt.plot(binCenters, n, ls='steps') 
                 plt.plot(binCenters, n2, ls='steps', linewidth=2)
-                plt.legend(['Without sampling algorithm', 'With sampling algorithm'])
-                plt.title('Not normed')
-                plt.draw()
+                plt.legend(['Without sampling algorithm', 'With sampling algorithm'], prop={'size':15})
+                #plt.title('Not normed')
+                plt.xlabel(r'$|F_i|$')
+                plt.ylabel('Force counts')
+                plt.tight_layout()
+                plt.savefig('tmp/forceDistSamplingAlgo.pdf')
+                #plt.draw()
                 raw_input('Press to continue: ')
                 
         if plotForceVsTime:
@@ -561,17 +573,34 @@ class AnalyzeForces:
 # interactive plot session (to avoid freezing of second plot)
 plt.ion() 
 
+# set plot parameters
+plt.rc('lines', linewidth=1.5)
+numberOfPlots = 15
+colormap = plt.cm.nipy_spectral
+colors = [colormap(i) for i in np.linspace(0, 1,numberOfPlots)]
+#plt.rc('axes', prop_cycle=(cycler('color', colors)))
+plt.rc('xtick', labelsize=20)
+plt.rc('ytick', labelsize=20)
+plt.rc('axes', labelsize=25)
+
 # read force files
 dirNameNN       = '../TestNN/Data/SiO2/Forces/26.05-19.19.56/'
-dirNameTarget   = '../Quartz/Data/Forces/L1T1000N1000NoAlgoNonPeriodic/'
+dirNameTarget   = '../Quartz/Data/Forces/L4T1000N1e4TwoChosenAtoms/'
 
-tauFile         = '../Quartz/tmp/tau2.0-2.0.txt'
-stepFile        = '../Quartz/tmp/step2.0-2.0.txt'
+alpha1 = 3.0
+alpha2 = 1.5
+
+tauFile         = '../Quartz/tmp/1e4tau%1.1f-%1.1f.txt' % (alpha1, alpha2)
+stepFile        = '../Quartz/tmp/1e4step%1.1f-%1.1f.txt' % (alpha1, alpha2)
 
 neighbourDir   = '../Quartz/Data/TrainingData/Bulk/L4T1000N1e4Algo'
 
-chosenAtom = 1
-includeNN = True
+# set chosenID if chosenAtom value does not correspond to atom ID
+chosenAtom = 0
+chosenID = 307
+#chosenID = None
+
+includeNN = False
 
 if includeNN:
     analyze = AnalyzeForces(dirNameNN=dirNameNN, dirNameTarget=dirNameTarget, chosenAtom=chosenAtom)
@@ -582,8 +611,9 @@ else:
     analyze.visualizeSampling(stepFile=stepFile, 
                               tauFile=tauFile, 
                               plotHist=True, nBins=7,
-                              plotForceVsTime=False)
-    analyze.transformDistribution(nBins=7, write=False, neighbourDir=neighbourDir)
+                              plotForceVsTime=False, 
+                              chosenID=chosenID)
+    #analyze.transformDistribution(nBins=7, write=False, neighbourDir=neighbourDir)
               
 
 

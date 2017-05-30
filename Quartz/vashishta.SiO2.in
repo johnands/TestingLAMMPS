@@ -1,13 +1,13 @@
 variable dumpForces equal 0
-variable dumpNeigh equal 0
-variable dumpTherm equal 1
+variable dumpNeigh equal 1
+variable dumpTherm equal 0
 variable dumpxyz equal 0
 variable dumpConfigs equal 0
 
 variable L equal 4
 variable initTemp equal 1000
 variable writeThermo equal 1
-variable nSteps equal 1000
+variable nSteps equal 10000
 
 # test Vashishta potential for quartz
 
@@ -43,9 +43,9 @@ timestep	0.001
 #fix radial all ave/time 100 10 1000 c_radialDist[*] file &
 #	Data/radialDist.txt mode vector
 
-# dump neighbours arguments: alpha1 (alpha2) maxFactor useAlgo
+# dump neighbours arguments: alpha1 (alpha2) maxDelayuseAlgo
 if "${dumpNeigh} == 1" then &
-	"compute neighList all neigh 2.0 1.5 50 0" &
+	"compute neighList all neigh 3.0 1.5 5 1" &
 	"fix dumpNeigh all ave/time 1 1 1 c_neighList file tmp/tmp.dump"
 
 # dump thermodynamic properties
