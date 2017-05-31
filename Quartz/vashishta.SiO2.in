@@ -1,5 +1,5 @@
 variable dumpForces equal 0
-variable dumpNeigh equal 1
+variable dumpNeigh equal 0
 variable dumpTherm equal 0
 variable dumpxyz equal 0
 variable dumpConfigs equal 0
@@ -43,7 +43,7 @@ timestep	0.001
 #fix radial all ave/time 100 10 1000 c_radialDist[*] file &
 #	Data/radialDist.txt mode vector
 
-# dump neighbours arguments: alpha1 (alpha2) maxDelayuseAlgo
+# dump neighbours arguments: alpha1 (alpha2) maxDelay useAlgo
 if "${dumpNeigh} == 1" then &
 	"compute neighList all neigh 3.0 1.5 5 1" &
 	"fix dumpNeigh all ave/time 1 1 1 c_neighList file tmp/tmp.dump"
