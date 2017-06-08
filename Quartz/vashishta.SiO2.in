@@ -1,13 +1,14 @@
 variable dumpForces equal 0
-variable dumpNeigh equal 0
-variable dumpTherm equal 0
+variable dumpNeigh equal 1
+variable useAlgo equal 0
+variable dumpTherm equal 1
 variable dumpxyz equal 0
 variable dumpConfigs equal 0
 
-variable L equal 4
+variable L equal 1
 variable initTemp equal 1000
 variable writeThermo equal 1
-variable nSteps equal 10000
+variable nSteps equal 5
 
 # test Vashishta potential for quartz
 
@@ -43,14 +44,16 @@ timestep	0.001
 #fix radial all ave/time 100 10 1000 c_radialDist[*] file &
 #	Data/radialDist.txt mode vector
 
-# dump neighbours arguments: alpha1 (alpha2) maxDelay useAlgo
-if "${dumpNeigh} == 1" then &
-	"compute neighList all neigh 3.0 1.5 5 1" &
-	"fix dumpNeigh all ave/time 1 1 1 c_neighList file tmp/tmp.dump"
+if "$L == 1" then &
+	"group chosen id 1 2 3 4 5 6 7 8 9" &
+else &
+	"group chosen id 308 310"
 
 # dump thermodynamic properties
-compute peAtom all pe/atom
-compute avePe all reduce ave c_peAtom
+compute peAtom chosen pe/atom
+compute avePe chosen reduce ave c_peAtom
+dump yes chosen custom 1 tmp/chosen.txt id c_peAtom
+dump_modify yes format line "%d %1.16g %1.16g %1.16g"
 
 compute keAtom all ke/atom
 compute aveKe all reduce ave c_keAtom
@@ -62,7 +65,8 @@ compute press all pressure temperature
 if "${dumpTherm} == 1" then &
 	"fix therm all ave/time 1 1 1 c_temperature c_aveKe c_avePe c_press file Data/Thermo/thermo.txt"
 
-group chosen id 308 310
+
+
 # dump forces
 if "${dumpForces} == 1" then &
 	"dump forces all custom 1 Data/Forces/forces.txt id fx fy fz" &
@@ -79,9 +83,14 @@ if "${dumpConfigs} == 1" then &
 	id x y z vx vy vz"
 
 
-thermo_style custom step temp ke pe etotal press 
+thermo_style custom step temp ke pe c_avePe etotal press 
 thermo ${writeThermo}
 thermo_modify norm yes
+
+# dump neighbours arguments: alpha1 (alpha2) maxDelay useAlgo
+if "${dumpNeigh} == 1" then &
+	"compute neighList chosen neigh 3.0 1.5 5 ${useAlgo}" &
+	"fix dumpNeigh chosen ave/time 1 1 1 c_neighList file tmp/tmp.dump"
 
 run		${nSteps}
 
