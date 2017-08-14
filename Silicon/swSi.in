@@ -1,13 +1,14 @@
-variable dumpForces equal 1
-variable dumpNeigh equal 0
+variable dumpForces equal 0
+variable dumpNeigh equal 1
+variable useAlgo equal 1
 variable therm equal 0
 variable dumpxyz equal 0
 variable dumpConfigs equal 0
 
-variable writeThermo equal 100
-variable L equal 10
+variable writeThermo equal 1
+variable L equal 4
 variable initTemp equal 1000
-variable nSteps equal 1000
+variable nSteps equal 2000
 
 # bulk Si via Stillinger-Weber
 
@@ -27,11 +28,12 @@ create_atoms 1 box
 #read_restart Sitherm.restart
 
 # Stillinger-Weber
-pair_style		mysw
 if "${dumpNeigh} == 1" then &
-	"pair_coeff		* * Si.sw Si TwoAtoms" &
+	"pair_style 	mysw" &
 else &
-	"pair_coeff		* * Si.sw Si"
+	"pair_style		sw"
+
+pair_coeff		* * Si.sw Si
 
 # mass in grams/mole -> atom number
 mass            1 28.06
@@ -76,7 +78,8 @@ compute press all pressure temperature
 #dump diffusion all custom 1 tmp/diffusion.txt id c_displacement[1] &
 #c_displacement[2] c_displacement[3] c_displacement[4]
 
-group chosen id 1000 2000
+group chosen id 299
+
 if "${dumpForces} == 1" then &
 	"dump forces chosen custom 1 Data/Forces/forces.txt id fx fy fz" &
 	"dump_modify forces sort id"
@@ -109,6 +112,11 @@ if "${dumpxyz} == 1" then &
 if "${dumpConfigs} == 1" then &
 	"dump configs all custom 1 Data/XYZData/Configs/L$LN${nSteps}.txt &
 	id x y z vx vy vz"
+
+# dump neighbours arguments: alpha1 (alpha2) maxDelay useAlgo
+if "${dumpNeigh} == 1" then &
+	"compute neighList chosen neigh 3.0 5 ${useAlgo}" &
+	"fix dumpNeigh chosen ave/time 1 1 1 c_neighList file tmp/tmp.dump"
 
 # sampling run
 run ${nSteps}

@@ -24,6 +24,7 @@ sys.path.insert(1, grandParentDir)
 sys.path.insert(2, gGrandParentDir)
 
 import TensorFlow.DataGeneration.readers as readers
+import TensorFlow.Tools.matplotlibParameters as pltParams
 
 
 def readForceFile(filename):
@@ -573,31 +574,38 @@ class AnalyzeForces:
 # interactive plot session (to avoid freezing of second plot)
 plt.ion() 
 
-# set plot parameters
-plt.rc('lines', linewidth=1.5)
-numberOfPlots = 15
-colormap = plt.cm.nipy_spectral
-colors = [colormap(i) for i in np.linspace(0, 1,numberOfPlots)]
-#plt.rc('axes', prop_cycle=(cycler('color', colors)))
-plt.rc('xtick', labelsize=20)
-plt.rc('ytick', labelsize=20)
-plt.rc('axes', labelsize=25)
+pltParams.defineColormap(6, plt.cm.jet)
 
 # read force files
 dirNameNN       = '../TestNN/Data/SiO2/Forces/26.05-19.19.56/'
-dirNameTarget   = '../Quartz/Data/Forces/L4T1000N1e4TwoChosenAtoms/'
+dirNameTarget   = '../Silicon/Data/Forces/L4T1000N2000/'
 
-alpha1 = 3.0
-alpha2 = 1.5
+nTypes = 1
 
-tauFile         = '../Quartz/tmp/1e4tau%1.1f-%1.1f.txt' % (alpha1, alpha2)
-stepFile        = '../Quartz/tmp/1e4step%1.1f-%1.1f.txt' % (alpha1, alpha2)
-
-neighbourDir   = '../Quartz/Data/TrainingData/Bulk/L4T1000N1e4Algo'
+# SiO2
+if nTypes > 1:
+    alpha1 = 3.0
+    alpha2 = 1.5
+    
+    tauFile         = '../Quartz/tmp/1e4tau%1.1f-%1.1f.txt' % (alpha1, alpha2)
+    stepFile        = '../Quartz/tmp/1e4step%1.1f-%1.1f.txt' % (alpha1, alpha2)
+    
+    neighbourDir   = '../Quartz/Data/TrainingData/Bulk/L4T1000N1e4Algo'
+    
+# Si
+else:
+    alpha = 3.0
+    
+    tauFile         = '../Silicon/tmp/1e4tau%1.1f.txt' % (alpha)
+    stepFile        = '../Silicon/tmp/1e4step%1.1f.txt' % (alpha)
+    
+    neighbourDir   = '../Silicon/Data/TrainingData/Bulk/L4T1000N2000'
 
 # set chosenID if chosenAtom value does not correspond to atom ID
+# chosenAtom should be the first atom whose tau is written out in case of multitype
+# chosenID is the LAMMPS id of the atom we want to plot force distribution for
 chosenAtom = 0
-chosenID = 307
+chosenID = 299
 #chosenID = None
 
 includeNN = False
