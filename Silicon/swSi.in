@@ -8,7 +8,7 @@ variable dumpConfigs equal 0
 variable writeThermo equal 1
 variable L equal 4
 variable initTemp equal 1000
-variable nSteps equal 2000
+variable nSteps equal 10000
 
 # bulk Si via Stillinger-Weber
 
