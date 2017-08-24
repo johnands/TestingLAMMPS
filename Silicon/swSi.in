@@ -1,14 +1,14 @@
 variable dumpForces equal 0
-variable dumpNeigh equal 1
-variable useAlgo equal 1
+variable dumpNeigh equal 0
+variable useAlgo equal 0
 variable therm equal 0
 variable dumpxyz equal 0
 variable dumpConfigs equal 0
 
-variable writeThermo equal 1
+variable writeThermo equal 100
 variable L equal 4
 variable initTemp equal 1000
-variable nSteps equal 10000
+variable nSteps equal 2000
 
 # bulk Si via Stillinger-Weber
 
@@ -110,7 +110,7 @@ if "${dumpxyz} == 1" then &
 	"dump stateFile2 all xyz 5 tmp/L$LN${nSteps}PeriodicSW.xyz"
 
 if "${dumpConfigs} == 1" then &
-	"dump configs all custom 1 Data/XYZData/Configs/L$LN${nSteps}.txt &
+	"dump configs all custom 1 Data/XYZData/Configs/L$LT${initTemp}N${nSteps}.txt &
 	id x y z vx vy vz"
 
 # dump neighbours arguments: alpha1 (alpha2) maxDelay useAlgo

@@ -52,8 +52,8 @@ else &
 # dump thermodynamic properties
 compute peAtom chosen pe/atom
 compute avePe chosen reduce ave c_peAtom
-dump yes chosen custom 1 tmp/chosen.txt id c_peAtom
-dump_modify yes format line "%d %1.16g %1.16g %1.16g"
+#dump yes chosen custom 1 tmp/chosen.txt id c_peAtom
+#dump_modify yes format line "%d %1.16g %1.16g %1.16g"
 
 compute keAtom all ke/atom
 compute aveKe all reduce ave c_keAtom

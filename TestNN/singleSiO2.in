@@ -25,8 +25,8 @@ velocity	all create ${initTemp} 277387 mom yes
 
 pair_style		nn/multitype
 
-pair_coeff		* * ../../TensorFlow/TrainingData/SiO2L1Type0NoZerosNoAlgo &
-					../../TensorFlow/TrainingData/SiO2L1Type1NoZerosNoAlgo &
+pair_coeff		* * ../../TensorFlow/TrainingData/SiO2Atoms2Type0OnlyG2 &
+					../../TensorFlow/TrainingData/SiO2Atoms2Type1OnlyG2 &
 					Si O &
 					5.5 
 
