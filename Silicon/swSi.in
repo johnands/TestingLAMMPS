@@ -7,8 +7,8 @@ variable dumpConfigs equal 0
 
 variable writeThermo equal 100
 variable L equal 4
-variable initTemp equal 1000
-variable nSteps equal 2000
+variable initTemp equal 3000
+variable nSteps equal 10000
 
 # bulk Si via Stillinger-Weber
 
@@ -17,7 +17,7 @@ atom_style		atomic
 
 # tetrahedral structure: diamond
 # 5.431 is lattice constant in Angstrom	
-lattice			diamond 5.431
+lattice			diamond 5.5 #5.431
 region myBox block 0 $L 0 $L 0 $L
 create_box 1 myBox
 create_atoms 1 box
@@ -74,9 +74,9 @@ compute temperature all temp
 compute press all pressure temperature
 
 # displacement for diffusion
-#compute displacement all displace/atom
-#dump diffusion all custom 1 tmp/diffusion.txt id c_displacement[1] &
-#c_displacement[2] c_displacement[3] c_displacement[4]
+compute displacement all displace/atom
+dump diffusion all custom 50 tmp/diffusion.txt id c_displacement[1] &
+c_displacement[2] c_displacement[3] c_displacement[4]#*c_displacement[4]
 
 group chosen id 299
 
