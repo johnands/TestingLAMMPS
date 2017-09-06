@@ -1,11 +1,11 @@
 variable dumpForces equal 0
 variable therm equal 0
 variable dumpxyz equal 0
-variable pseudoSim equal 1
+variable pseudoSim equal 0
 
-variable L equal 4
-variable initTemp equal 1000
-variable nSteps equal 2000
+variable L equal 5
+variable initTemp equal 300
+variable nSteps equal 100
 
 # bulk Si via Stillinger-Weber
 # test minimum distance that Si atoms can have in bulk Si
@@ -27,7 +27,7 @@ create_atoms 1 box
 
 # neural network
 pair_style		nn/angular2
-pair_coeff		* * ../../TensorFlow/TrainingData/TestScalingShifting/WithScalingShifting/2 3.77118
+pair_coeff		* * ../../TensorFlow/TrainingData/TestShift 3.77118
 
 # mass in grams/mole -> atom number
 mass            1 28.06

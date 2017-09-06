@@ -4,10 +4,15 @@ variable useAlgo equal 0
 variable therm equal 0
 variable dumpxyz equal 0
 variable dumpConfigs equal 0
+variable restart equal 0
 
-variable writeThermo equal 100
-variable L equal 4
-variable initTemp equal 3000
+if "${dumpNeigh} == 1" then &
+	"variable writeThermo equal 1" &
+else &
+	"variable writeThermo equal 100"
+
+variable L equal 5
+variable initTemp equal 300
 variable nSteps equal 10000
 
 # bulk Si via Stillinger-Weber
@@ -15,17 +20,21 @@ variable nSteps equal 10000
 units			metal
 atom_style		atomic
 
+if "${restart} == 1" then &
+	"read_restart SiL$LT${initTemp}.restart"
+
 # tetrahedral structure: diamond
 # 5.431 is lattice constant in Angstrom	
-lattice			diamond 5.5 #5.431
+lattice			diamond 5.431
 region myBox block 0 $L 0 $L 0 $L
-create_box 1 myBox
-create_atoms 1 box
+
+if "${restart} == 0" then &
+	"create_box 1 myBox" &
+	"create_atoms 1 box"
+
 #change_box all x delta -50 50
 #change_box all y delta -50 50
 #change_box all z delta -50 50
-
-#read_restart Sitherm.restart
 
 # Stillinger-Weber
 if "${dumpNeigh} == 1" then &
@@ -38,7 +47,8 @@ pair_coeff		* * Si.sw Si
 # mass in grams/mole -> atom number
 mass            1 28.06
 
-velocity		all create ${initTemp} 376847 loop geom
+if "${restart} == 0" then &
+	"velocity		all create ${initTemp} 376847 loop geom"
 
 neighbor		1.0 bin
 
@@ -73,9 +83,19 @@ compute temperature all temp
 
 compute press all pressure temperature
 
+# local computes like pair/local can be dumped with dump local
+# per-atom computes can be dumped with dump custom
+# global computes like minDist must be dumped with thermo custom
+thermo_style custom step temp ke pe c_avePe etotal  
+thermo ${writeThermo}
+thermo_modify norm yes
+
+# thermalize
+run 30000
+
 # displacement for diffusion
-compute displacement all displace/atom
-dump diffusion all custom 50 tmp/diffusion.txt id c_displacement[1] &
+#compute displacement all displace/atom
+#dump diffusion all custom 50 tmp/diffusion.txt id c_displacement[1] &
 c_displacement[2] c_displacement[3] c_displacement[4]#*c_displacement[4]
 
 group chosen id 299
@@ -85,10 +105,10 @@ if "${dumpForces} == 1" then &
 	"dump_modify forces sort id"
 
 if "${therm} == 1" then &
-	"fix therm all ave/time 1 1 1 c_temperature c_aveKe c_avePe c_press file Data/Thermo/thermo.txt"
+	"fix therm all ave/time 1 1 100 c_temperature c_aveKe c_avePe c_press file Data/Thermo/thermo.txt"
 
 # compute radial distribution with 50 bins
-#compute radialDist all rdf 50
+compute radialDist all rdf 50
 
 # compute time-averaged rdf
 # Nevery Nrepeat Nfreq
@@ -97,14 +117,7 @@ if "${therm} == 1" then &
 # Nfreq: compute final average every Nfreq time steps
 # eg 2 6 100 means calculating final average every 100 time steps
 # and the steps contributing to the average is 90, 92, 94, 96, 98, 100
-#fix radial all ave/time 100 10 1000 c_radialDist[*] file Data/radialDist.dat mode vector
-
-# local computes like pair/local can be dumped with dump local
-# per-atom computes can be dumped with dump custom
-# global computes like minDist must be dumped with thermo custom
-thermo_style custom step temp ke pe c_avePe etotal  
-thermo ${writeThermo}
-thermo_modify norm yes
+fix radial all ave/time 100 10 1000 c_radialDist[*] file Data/radialDist.dat mode vector
 
 if "${dumpxyz} == 1" then &
 	"dump stateFile2 all xyz 5 tmp/L$LN${nSteps}PeriodicSW.xyz"
@@ -121,7 +134,7 @@ if "${dumpNeigh} == 1" then &
 # sampling run
 run ${nSteps}
 
-#write_restart Sitherm.restart
+#write_restart SiL$LT${initTemp}.restart
 
 # make directory if sampling thermodynamics
 if "${therm} == 1" then &

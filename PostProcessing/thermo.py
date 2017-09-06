@@ -36,7 +36,7 @@ def readFile(filename):
     
     
 dirNameNN = '../TestNN/Data/SiO2/Thermo/L4T1000N1000NoAlgo/'
-dirNameSW = '../Quartz/Data/Thermo/L4T1000N1000/'
+dirNameSW = '../Silicon/Data/Thermo/06.09-14.06.23/'
 
 # write out README files
 print "Content of SW folder:"
@@ -47,9 +47,10 @@ os.system('cat ' + dirNameNN + 'README.txt')
 tempNN, kinNN, potNN, pressNN = readFile(dirNameNN + 'thermo.txt')
 tempSW, kinSW, potSW, pressSW = readFile(dirNameSW + 'thermo.txt')
 
-potFactor = np.average(potNN / potSW)
-print "Potential energy factor: ", potFactor
-#potNN /= potFactor
+if not (plot == 'notNN' or plot == 'tempFluct'):
+    potFactor = np.average(potNN / potSW)
+    print "Potential energy factor: ", potFactor
+    #potNN /= potFactor
 
 totalEnergyNN = kinNN + potNN
 totalEnergySW = kinSW + potSW
@@ -89,6 +90,32 @@ elif plot == 'kin':
     plt.xlabel('Timestep')
     plt.ylabel('Kinetic energy')
     plt.show()
+    
+elif plot == 'notNN':
+    plt.subplot(2,2,1)
+    plt.plot(tempSW)
+    plt.subplot(2,2,2)
+    plt.plot(kinSW)
+    plt.subplot(2,2,3)
+    plt.plot(potSW)
+    plt.subplot(2,2,4)
+    plt.plot(totalEnergySW)
+    plt.show()
+    
+elif plot == 'tempFluct':
+    dev = tempSW - np.average(tempSW)
+    plt.plot(dev)
+    plt.show()
+    
+    # compute interval average oscillations
+    bins = 10
+    binSize = numberOfSamples/bins
+    deviations = np.zeros(bins)
+    for i in xrange(bins):
+        deviations[i] = np.std(dev[i*binSize:(i+1)*binSize])
+        
+    print deviations    
+    
     
 else: 
     plt.subplot(2,2,1)
