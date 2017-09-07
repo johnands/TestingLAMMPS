@@ -2,10 +2,11 @@ variable dumpForces equal 0
 variable therm equal 0
 variable dumpxyz equal 0
 variable pseudoSim equal 0
+variable dumpNeigh equal 1
 
 variable L equal 5
 variable initTemp equal 300
-variable nSteps equal 100
+variable nSteps equal 5000
 
 # bulk Si via Stillinger-Weber
 # test minimum distance that Si atoms can have in bulk Si
@@ -27,7 +28,7 @@ create_atoms 1 box
 
 # neural network
 pair_style		nn/angular2
-pair_coeff		* * ../../TensorFlow/TrainingData/TestShift 3.77118
+pair_coeff		* * ../../TensorFlow/TrainingData/InitialSetSi 3.77118
 
 # mass in grams/mole -> atom number
 mass            1 28.06
@@ -41,11 +42,11 @@ neighbor		1.0 bin
 if "${pseudoSim} == 0" then &
 	"fix 1 all nve"
 
-#timestep		0.001
+timestep		0.001
 
 # pair-wise distance, this is a local compute
-group chosen id 4
-compute pairDist chosen pair/local dist
+#group chosen id 4
+#compute pairDist chosen pair/local dist
 
 # number of neighbours for each atom
 #compute neighbours all coord/atom cutoff 3.77
@@ -83,7 +84,7 @@ if "${therm} == 1" then &
 # local computes like pair/local can be dumped with dump local
 # per-atom computes can be dumped with dump custom
 # global computes like minDist must be dumped with thermo custom
-thermo_style custom step temp ke pe cpuremain c_avePe etotal
+thermo_style custom step temp ke pe c_avePe etotal cpuremain
 thermo 1
 thermo_modify norm yes
 
@@ -104,6 +105,8 @@ else &
 	"run ${nSteps}"	
 
 # make directory if sampling neighbour lists
+if "${dumpNeigh} == 1" then &
+	"shell ./makeDirs/makeTrainingDirSiBulk.sh"
 
 # make directory if sampling thermodynamics
 if "${therm} == 1" then &

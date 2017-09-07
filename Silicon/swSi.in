@@ -12,7 +12,7 @@ else &
 	"variable writeThermo equal 100"
 
 variable L equal 5
-variable initTemp equal 300
+variable initTemp equal 500
 variable nSteps equal 10000
 
 # bulk Si via Stillinger-Weber
@@ -59,18 +59,18 @@ timestep		0.001
 # pair-wise distance, this is a local compute
 #compute pairDist all pair/local dist
 
-# number of neighbours for each atom
-#compute neighbours all coord/atom cutoff 3.77118
-
 # minimum, max and average pair-wise distance, this is a global compute
 #compute minDist all reduce min c_pairDist
 #compute avDist all reduce ave c_pairDist
 #compute maxDist all reduce max c_pairDist
 
-# compute 
-#compute maxNeigh all reduce max c_neighbours
-#compute minNeigh all reduce min c_neighbours
-#compute aveNeigh all reduce ave c_neighbours
+# number of neighbours for each atom
+compute neighbours all coord/atom cutoff 3.77118
+
+# compute coordination numbers
+compute maxNeigh all reduce max c_neighbours
+compute minNeigh all reduce min c_neighbours
+compute aveNeigh all reduce ave c_neighbours
 
 # computes that I output to file via fixes
 compute peAtom all pe/atom
@@ -86,7 +86,8 @@ compute press all pressure temperature
 # local computes like pair/local can be dumped with dump local
 # per-atom computes can be dumped with dump custom
 # global computes like minDist must be dumped with thermo custom
-thermo_style custom step temp ke pe c_avePe etotal  
+#thermo_style custom step temp ke pe c_avePe etotal  
+thermo_style custom step c_minNeigh c_maxNeigh c_aveNeigh 
 thermo ${writeThermo}
 thermo_modify norm yes
 
@@ -108,7 +109,7 @@ if "${therm} == 1" then &
 	"fix therm all ave/time 1 1 100 c_temperature c_aveKe c_avePe c_press file Data/Thermo/thermo.txt"
 
 # compute radial distribution with 50 bins
-compute radialDist all rdf 50
+#compute radialDist all rdf 50
 
 # compute time-averaged rdf
 # Nevery Nrepeat Nfreq
@@ -117,7 +118,7 @@ compute radialDist all rdf 50
 # Nfreq: compute final average every Nfreq time steps
 # eg 2 6 100 means calculating final average every 100 time steps
 # and the steps contributing to the average is 90, 92, 94, 96, 98, 100
-fix radial all ave/time 100 10 1000 c_radialDist[*] file Data/radialDist.dat mode vector
+#fix radial all ave/time 100 10 1000 c_radialDist[*] file Data/radialDist.dat mode vector
 
 if "${dumpxyz} == 1" then &
 	"dump stateFile2 all xyz 5 tmp/L$LN${nSteps}PeriodicSW.xyz"
