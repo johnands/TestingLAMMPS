@@ -4,7 +4,9 @@ variable useAlgo equal 0
 variable therm equal 0
 variable dumpxyz equal 0
 variable dumpConfigs equal 0
-variable restart equal 0
+variable readRestart equal 0
+variable restartStep equal 5000
+variable writeRestart equal 0
 
 if "${dumpNeigh} == 1" then &
 	"variable writeThermo equal 1" &
@@ -13,22 +15,22 @@ else &
 
 variable L equal 5
 variable initTemp equal 500
-variable nSteps equal 10000
+variable nSteps equal 700
 
 # bulk Si via Stillinger-Weber
 
 units			metal
 atom_style		atomic
 
-if "${restart} == 1" then &
-	"read_restart SiL$LT${initTemp}.restart"
+if "${readRestart} == 1" then &
+	"read_restart SiL$LT${initTemp}N${restartStep}.restart"
 
 # tetrahedral structure: diamond
 # 5.431 is lattice constant in Angstrom	
 lattice			diamond 5.431
 region myBox block 0 $L 0 $L 0 $L
 
-if "${restart} == 0" then &
+if "${readRestart} == 0" then &
 	"create_box 1 myBox" &
 	"create_atoms 1 box"
 
@@ -47,7 +49,7 @@ pair_coeff		* * Si.sw Si
 # mass in grams/mole -> atom number
 mass            1 28.06
 
-if "${restart} == 0" then &
+if "${readRestart} == 0" then &
 	"velocity		all create ${initTemp} 376847 loop geom"
 
 neighbor		1.0 bin
@@ -86,13 +88,13 @@ compute press all pressure temperature
 # local computes like pair/local can be dumped with dump local
 # per-atom computes can be dumped with dump custom
 # global computes like minDist must be dumped with thermo custom
-#thermo_style custom step temp ke pe c_avePe etotal  
-thermo_style custom step c_minNeigh c_maxNeigh c_aveNeigh 
+thermo_style custom step temp ke pe c_avePe etotal  
+#thermo_style custom step c_minNeigh c_maxNeigh c_aveNeigh 
 thermo ${writeThermo}
 thermo_modify norm yes
 
 # thermalize
-run 30000
+#run 30000
 
 # displacement for diffusion
 #compute displacement all displace/atom
@@ -135,7 +137,8 @@ if "${dumpNeigh} == 1" then &
 # sampling run
 run ${nSteps}
 
-#write_restart SiL$LT${initTemp}.restart
+if "${writeRestart} == 1" then &
+	"write_restart SiL$LT${initTemp}${nSteps}.restart"
 
 # make directory if sampling thermodynamics
 if "${therm} == 1" then &

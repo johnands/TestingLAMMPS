@@ -1,12 +1,16 @@
 variable dumpForces equal 0
-variable therm equal 0
+variable therm equal 1
 variable dumpxyz equal 0
 variable pseudoSim equal 0
-variable dumpNeigh equal 1
+variable dumpNeigh equal 0
+variable dumpConfigs equal 1
+variable readRestart equal 0
+variable restartStep equal 5000
+variable writeRestart equal 0
 
 variable L equal 5
 variable initTemp equal 300
-variable nSteps equal 5000
+variable nSteps equal 2000
 
 # bulk Si via Stillinger-Weber
 # test minimum distance that Si atoms can have in bulk Si
@@ -14,26 +18,29 @@ variable nSteps equal 5000
 units			metal
 atom_style		atomic
 
+if "${readRestart} == 1" then &
+	"read_restart ../Silicon/SiL$LT${initTemp}N${restartStep}.restart"
+
 # tetrahedral structure: diamond
 # 5.431 is lattice constant in Angstrom	
 lattice			diamond 5.431
 region myBox block 0 $L 0 $L 0 $L
-create_box 1 myBox
-create_atoms 1 box
+if "${readRestart} == 0" then &
+	"create_box 1 myBox" &
+	"create_atoms 1 box"
 #change_box all x delta -50 50
 #change_box all y delta -50 50
 #change_box all z delta -50 50
 
-#read_restart ../Silicon/Sitherm.restart
-
 # neural network
 pair_style		nn/angular2
-pair_coeff		* * ../../TensorFlow/TrainingData/InitialSetSi 3.77118
+pair_coeff		* * ../../TensorFlow/TrainingData/NNPotentialRun3.1 3.77118
 
 # mass in grams/mole -> atom number
 mass            1 28.06
 
-velocity		all create ${initTemp} 376847 loop geom
+if "${readRestart} == 0" then &
+	"velocity		all create ${initTemp} 376847 loop geom"
 
 neighbor		1.0 bin
 #neigh_modify    every 1 
@@ -94,6 +101,10 @@ thermo_modify norm yes
 # dump positions for use in training
 #dump stateFile all custom 100 Data/SiL10*.xyz x y z
 
+if "${dumpConfigs} == 1" then &
+	"dump configs all custom 1 Data/Si/XYZData/Configs/L$LT${initTemp}N${nSteps}.txt &
+	id x y z vx vy vz"
+
 if "${dumpxyz} == 1" then &
 	"dump stateFile2 all xyz 50 tmp/L$LNN.xyz"
 
@@ -103,6 +114,9 @@ if "${pseudoSim} == 1" then &
 	dump x y z vx vy vz" &
 else &
 	"run ${nSteps}"	
+
+if "${writeRestart} == 1" then &
+	"write_restart SiL$LT${initTemp}N${nSteps}.restart"
 
 # make directory if sampling neighbour lists
 if "${dumpNeigh} == 1" then &
