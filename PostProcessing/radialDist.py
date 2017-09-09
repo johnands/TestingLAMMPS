@@ -1,5 +1,6 @@
 import numpy as np
 import matplotlib.pyplot as plt
+import sys
 
 
 def readRadialdist(filename):
@@ -38,38 +39,68 @@ def readRadialdist(filename):
     return timeSteps, distribution, bins, nBins
 		
   
-filename = '../Silicon/Data/RadialDist/radialDist.dat' 
-timeSteps, distribution, bins, nBins = readRadialdist(filename)
+  
+def singleDistCompare(fileTarget, fileNN):
+    
+    timeSteps, distribution, bins, nBins = readRadialdist(fileTarget)
+    timeStepsNN, distNN, binsNN, nBinsNN = readRadialdist(fileNN)
+    
+    assert(np.array_equal(timeSteps, timeStepsNN))
+    assert(np.array_equal(bins, binsNN))
+    
+    bins = np.array(bins)
+    distribution = np.array(distribution)
+    distNN = np.array(distNN)
+    binCenters = (bins[1:] + bins[:-1]) / 2.0
+    
+    # plot first distribution
+    plt.plot(binCenters, distribution, 'b-', binCenters, distNN, 'g-')
+    plt.legend(['Target', 'NN'])
+    plt.show()
+    
+    
+    
+def timeDist(filename, write=False):
+    
+    timeSteps, distribution, bins, nBins = readRadialdist(filename)
+    
+    bins = np.array(bins)
+    distribution = np.array(distribution)
+    binCenters = (bins[1:] + bins[:-1]) / 2.0
 
-bins = np.array(bins)
-distribution = np.array(distribution)
-binCenters = (bins[1:] + bins[:-1]) / 2.0
+    nTimeSteps = len(timeSteps)
 
-# plot first distribution
-plt.plot(binCenters, distribution[:nBins])
-plt.show()
+    # plot total time-averaged distribution
+    timeAveragedDist = np.zeros(nBins)
+    for i in xrange(nTimeSteps):
+        for j in xrange(nBins): 
+            timeAveragedDist[j] += distribution[i*nBins + j]
+     
+    timeAveragedDist /= nTimeSteps
 
-nTimeSteps = len(timeSteps)
-
-# plot total time-averaged distribution
-timeAveragedDist = np.zeros(nBins)
-for i in xrange(nTimeSteps):
-    for j in xrange(nBins): 
-        timeAveragedDist[j] += distribution[i*nBins + j]
- 
-timeAveragedDist /= nTimeSteps
-
-write = True
-if write: 
-    with open('tmp/radialDist.txt', 'w') as outfile:
-        for i in xrange(len(binCenters)):
-            outfile.write('%g %g' % (binCenters[i], distribution[i]))
-            outfile.write('\n')
+    if write: 
+        with open('tmp/radialDist.txt', 'w') as outfile:
+            for i in xrange(len(binCenters)):
+                outfile.write('%g %g' % (binCenters[i], distribution[i]))
+                outfile.write('\n')
         
 
-# plot time-averaged distribution
-plt.plot(binCenters, timeAveragedDist)
-plt.show()
+    # plot time-averaged distribution
+    plt.plot(binCenters, timeAveragedDist)
+    plt.legend(['Time-averaged distribution'])
+    plt.show()
+    
+    
+
+if len(sys.argv) > 2:
+    filenameTarget = sys.argv[1]
+    filenameNN = sys.argv[2]
+    singleDistCompare(filenameTarget, filenameNN)
+    
+else:
+    filename = sys.argv[1]
+    timeDist(filename)
+    
 
 
 

@@ -4,9 +4,11 @@ variable useAlgo equal 0
 variable therm equal 0
 variable dumpxyz equal 0
 variable dumpConfigs equal 0
-variable readRestart equal 0
-variable restartStep equal 5000
+variable readRestart equal 1
+variable restartStep equal 10000
 variable writeRestart equal 0
+variable computeRdf equal 1
+variable nBins equal 100
 
 if "${dumpNeigh} == 1" then &
 	"variable writeThermo equal 1" &
@@ -14,8 +16,8 @@ else &
 	"variable writeThermo equal 100"
 
 variable L equal 5
-variable initTemp equal 500
-variable nSteps equal 700
+variable initTemp equal 300
+variable nSteps equal 1000
 
 # bulk Si via Stillinger-Weber
 
@@ -23,7 +25,7 @@ units			metal
 atom_style		atomic
 
 if "${readRestart} == 1" then &
-	"read_restart SiL$LT${initTemp}N${restartStep}.restart"
+	"read_restart Restarts/SiL$LT${initTemp}N${restartStep}.restart"
 
 # tetrahedral structure: diamond
 # 5.431 is lattice constant in Angstrom	
@@ -111,8 +113,6 @@ if "${therm} == 1" then &
 	"fix therm all ave/time 1 1 100 c_temperature c_aveKe c_avePe c_press file Data/Thermo/thermo.txt"
 
 # compute radial distribution with 50 bins
-#compute radialDist all rdf 50
-
 # compute time-averaged rdf
 # Nevery Nrepeat Nfreq
 # Nevery: space between each step contributing to final average
@@ -120,7 +120,10 @@ if "${therm} == 1" then &
 # Nfreq: compute final average every Nfreq time steps
 # eg 2 6 100 means calculating final average every 100 time steps
 # and the steps contributing to the average is 90, 92, 94, 96, 98, 100
-#fix radial all ave/time 100 10 1000 c_radialDist[*] file Data/radialDist.dat mode vector
+if "${computeRdf} == 1" then &
+	"compute radialDist all rdf ${nBins}" &
+	"fix radial all ave/time 100 10 1000 c_radialDist[*] &
+	file Data/Dist/radialDist.dat mode vector"
 
 if "${dumpxyz} == 1" then &
 	"dump stateFile2 all xyz 5 tmp/L$LN${nSteps}PeriodicSW.xyz"
@@ -138,7 +141,7 @@ if "${dumpNeigh} == 1" then &
 run ${nSteps}
 
 if "${writeRestart} == 1" then &
-	"write_restart SiL$LT${initTemp}${nSteps}.restart"
+	"write_restart Restarts/SiL$LT${initTemp}N${nSteps}.restart"
 
 # make directory if sampling thermodynamics
 if "${therm} == 1" then &
