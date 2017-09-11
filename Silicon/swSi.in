@@ -4,20 +4,20 @@ variable useAlgo equal 0
 variable therm equal 0
 variable dumpxyz equal 0
 variable dumpConfigs equal 0
-variable readRestart equal 1
+variable readRestart equal 0
 variable restartStep equal 10000
 variable writeRestart equal 0
-variable computeRdf equal 1
-variable nBins equal 100
+variable computeRdf equal 0
+variable nBins equal 500
 
 if "${dumpNeigh} == 1" then &
 	"variable writeThermo equal 1" &
 else &
 	"variable writeThermo equal 100"
 
-variable L equal 5
+variable L equal 3
 variable initTemp equal 300
-variable nSteps equal 1000
+variable nSteps equal 3000
 
 # bulk Si via Stillinger-Weber
 
@@ -90,9 +90,9 @@ compute press all pressure temperature
 # local computes like pair/local can be dumped with dump local
 # per-atom computes can be dumped with dump custom
 # global computes like minDist must be dumped with thermo custom
-thermo_style custom step temp ke pe c_avePe etotal  
+thermo_style custom step temp ke pe c_avePe etotal press  
 #thermo_style custom step c_minNeigh c_maxNeigh c_aveNeigh 
-thermo ${writeThermo}
+thermo 1#${writeThermo}
 thermo_modify norm yes
 
 # thermalize
@@ -103,14 +103,14 @@ thermo_modify norm yes
 #dump diffusion all custom 50 tmp/diffusion.txt id c_displacement[1] &
 c_displacement[2] c_displacement[3] c_displacement[4]#*c_displacement[4]
 
-group chosen id 299
+group chosen id 10 100 200
 
 if "${dumpForces} == 1" then &
-	"dump forces chosen custom 1 Data/Forces/forces.txt id fx fy fz" &
+	"dump forces all custom 1 Data/Forces/forces.txt id fx fy fz" &
 	"dump_modify forces sort id"
 
 if "${therm} == 1" then &
-	"fix therm all ave/time 1 1 100 c_temperature c_aveKe c_avePe c_press file Data/Thermo/thermo.txt"
+	"fix therm all ave/time 1 1 1 c_temperature c_aveKe c_avePe c_press file Data/Thermo/thermo.txt"
 
 # compute radial distribution with 50 bins
 # compute time-averaged rdf

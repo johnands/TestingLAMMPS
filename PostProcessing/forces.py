@@ -135,7 +135,7 @@ class AnalyzeForces:
             # read all forces in force file
             timeStepsNN, self.forcesNN, numberOfAtomsNN = readForceFile(dirNameNN + 'forces.txt')
             timeStepsTarget, self.forcesTarget, numberOfAtomsTarget = readForceFile(dirNameTarget + 'forces.txt')
-            assert(numberOfAtomsNN == numberOfAtomsTarget)
+            #assert(numberOfAtomsNN == numberOfAtomsTarget)
             self.numberOfAtoms = numberOfAtomsNN
             
             # check that time step arrays of SW and NN are equal
@@ -281,22 +281,31 @@ class AnalyzeForces:
         yError = FyNN - FyTarget
         zError = FzNN - FzTarget
         absError = Fnn - Ftarget
+        squareError = (Fnn - Ftarget)**2
         self.absError = absError
            
         # plot error vs |F|
         if plotErrorVsF:
             errorVsForce = []
-            forceValues = np.linspace(0, np.max(Fnn), 6)
+            forceValues = np.linspace(0, np.max(Fnn), 10)
+            binCenters  = (forceValues[1:] + forceValues[:-1]) / 2.0
             for i in xrange(len(forceValues)-1):
                 interval = np.where(Fnn < forceValues[i+1])[0]
                 #errorVsForce.append(np.std(absError[interval]))
-                errorVsForce.append(np.sum(absError[interval]**2)/len(interval))
+                errorVsForce.append(np.sqrt(np.sum(squareError[interval])/len(interval)))
             plt.figure()
-            plt.plot(forceValues[1:], errorVsForce)
-            plt.xlabel('Absolute force NN')
-            plt.ylabel('Error')
+            plt.plot(binCenters, errorVsForce, 'bo--')
+            plt.xlabel(r'$|F_{\mathrm{NN}}| \; [\mathrm{eV/\AA{}}]$')
+            plt.ylabel('RMSE')
+            plt.tight_layout()
+            #plt.savefig('../../Oppgaven/Figures/Results/SiForces.pdf')
             plt.draw()
             raw_input('Press to continue: ')
+            
+        plt.figure()
+        plt.hist(Fnn, bins=30)
+        plt.draw()
+        raw_input('Press to continue: ')
         
         # output
         print "Average error Fx: ", np.average(xError)
@@ -308,6 +317,7 @@ class AnalyzeForces:
         print "RMSE Fy: ", np.sqrt( np.average(yError**2) )
         print "RMSE Fz: ", np.sqrt( np.average(zError**2) )
         print "RMSE |F|: ", np.sqrt( np.average(absError**2) )
+        print "RMSE |F|: ", np.sqrt(np.sum(squareError)/len(Fnn))
         print 
         print "Std. dev. error Fx: ", np.std(xError)
         print "Std. dev. error Fy: ", np.std(yError)
@@ -577,8 +587,8 @@ plt.ion()
 pltParams.defineColormap(6, plt.cm.jet)
 
 # read force files
-dirNameNN       = '../TestNN/Data/SiO2/Forces/26.05-19.19.56/'
-dirNameTarget   = '../Silicon/Data/Forces/L4T1000N2000/'
+dirNameNN       = '../TestNN/Data/Si/Forces/L3T300N3000PseudoFinal/'
+dirNameTarget   = '../Silicon/Data/Forces/L3T300N3000/'
 
 nTypes = 1
 
@@ -604,11 +614,11 @@ else:
 # set chosenID if chosenAtom value does not correspond to atom ID
 # chosenAtom should be the first atom whose tau is written out in case of multitype
 # chosenID is the LAMMPS id of the atom we want to plot force distribution for
-chosenAtom = 0
-chosenID = 299
+chosenAtom = 100
+chosenID = 10
 #chosenID = None
 
-includeNN = False
+includeNN = True
 
 if includeNN:
     analyze = AnalyzeForces(dirNameNN=dirNameNN, dirNameTarget=dirNameTarget, chosenAtom=chosenAtom)

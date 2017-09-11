@@ -77,7 +77,7 @@ def readPotFile(filename, chosenID):
     
     
     
-def targetAndNN(dirNameTarget, dirNameNN):
+def targetAndNN(dirNameSW, dirNameNN, plot):
     
     # write out README files
     print "Content of SW folder:"
@@ -196,12 +196,12 @@ def multipleNNAverage(dirNames):
     plt.show()
     
     
-def multipleNN(dirNames, chosenID):
+def multipleNN(dirNames, chosenID, write=False):
     
     numberOfNNs = len(dirNames)
     
     pot = []
-    cut = 1000
+    cut = 3000
     for i in xrange(numberOfNNs):
         timeSteps, energies, _ = readPotFile(dirNames[i] + 'thermo.txt', chosenID)
         pot.append(energies)
@@ -220,7 +220,7 @@ def multipleNN(dirNames, chosenID):
     plt.xlabel('Time step')
     plt.ylabel('Potential energy [eV]')
     plt.tight_layout()
-    plt.savefig('../../Oppgaven/Figures/Results/multipleNNP.pdf')
+    #plt.savefig('../../Oppgaven/Figures/Results/multipleNNP.pdf')
     #plt.show()
     
     stdDev = np.std(pot[:cut], axis=0)
@@ -228,25 +228,44 @@ def multipleNN(dirNames, chosenID):
     plt.legend(['Std. dev. of all NNPs as function of time'])
     #plt.show()
     
+    absError = np.max(pot[:cut], axis=0) - np.min(pot[:cut], axis=0)
+    plt.plot(absError)
+    plt.legend(['Absolute error'])
+    #plt.show()
+    
     avePot = np.average(pot, axis=0)
     print np.where(stdDev > np.abs(0.001*avePot))[0]
+    
+    samples = np.where(absError > 0.005)[0]
+    print len(samples)
+    
+    if write:
+        with open('samples10000-13000A%d.txt' % chosenID, 'w') as outfile:
+            for i in xrange(len(samples)):
+                outfile.write('%d' % samples[i])
+                outfile.write('\n')
+        
+    
     
         
  
     
 
-dirName1 = '../TestNN/Data/Si/Thermo/MultipleNNP1/'
-dirName2 = '../TestNN/Data/Si/Thermo/MultipleNNP2/'
-dirName3 = '../TestNN/Data/Si/Thermo/MultipleNNP3/'
-dirName4 = '../TestNN/Data/Si/Thermo/MultipleNNP4/'
-#dirName1 = '../TestNN/Data/Si/Thermo/MultipleNNP1Restart/'
-#dirName2 = '../TestNN/Data/Si/Thermo/MultipleNNP2Restart/'
-#dirName3 = '../TestNN/Data/Si/Thermo/MultipleNNP3Restart/'
-#dirName4 = '../TestNN/Data/Si/Thermo/MultipleNNP4Restart/'
+#dirName1 = '../TestNN/Data/Si/Thermo/MultipleNNP1/'
+#dirName2 = '../TestNN/Data/Si/Thermo/MultipleNNP2/'
+#dirName3 = '../TestNN/Data/Si/Thermo/MultipleNNP3/'
+#dirName4 = '../TestNN/Data/Si/Thermo/MultipleNNP4/'
+dirName1 = '../TestNN/Data/Si/Thermo/MultipleNNP1Restart/'
+dirName2 = '../TestNN/Data/Si/Thermo/MultipleNNP2Restart/'
+dirName3 = '../TestNN/Data/Si/Thermo/MultipleNNP3Restart/'
+dirName4 = '../TestNN/Data/Si/Thermo/MultipleNNP4Restart/'
 dirNames = [dirName1, dirName2, dirName3, dirName4]
 #dirNames = [dirName1, dirName2]
 
-multipleNN(dirNames, 200)
+multipleNN(dirNames, 200, write=True)
+
+#targetAndNN('../Silicon/Data/Thermo/L3T300N3000/', '../TestNN/Data/Si/Thermo/L3T300N3000Pseudo/', 'both')
+
 
 
     

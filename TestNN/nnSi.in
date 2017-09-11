@@ -1,15 +1,15 @@
 variable dumpForces equal 0
 variable therm equal 0
-variable peAtom equal 1
+variable peAtom equal 0
 variable dumpxyz equal 0
-variable pseudoSim equal 1
+variable pseudoSim equal 0
 variable dumpNeigh equal 0
 variable dumpConfigs equal 0
 variable readRestart equal 0
 variable restartStep equal 10000
 variable writeRestart equal 0
 variable computeRdf equal 0
-variable nBins equal 200
+variable nBins equal 500
 
 variable L equal 3
 variable initTemp equal 300
@@ -22,7 +22,7 @@ units			metal
 atom_style		atomic
 
 if "${readRestart} == 1" then &
-	"read_restart Restarts/SiL$LT${initTemp}N${restartStep}.restart"
+	"read_restart Restarts/SiL$LT${initTemp}N${restartStep}Complete.restart"
 
 # tetrahedral structure: diamond
 # 5.431 is lattice constant in Angstrom	
@@ -37,7 +37,7 @@ if "${readRestart} == 0" then &
 
 # neural network
 pair_style		nn/angular2
-pair_coeff		* * ../../TensorFlow/TrainingData/NNPotentialRun3.4 3.77118
+pair_coeff		* * ../../TensorFlow/TrainingData/NNPotentialFinal 3.77118
 
 # mass in grams/mole -> atom number
 mass            1 28.06
@@ -98,7 +98,7 @@ if "${peAtom} == 1" then &
 # local computes like pair/local can be dumped with dump local
 # per-atom computes can be dumped with dump custom
 # global computes like minDist must be dumped with thermo custom
-thermo_style custom step temp ke pe c_avePe etotal cpuremain
+thermo_style custom step temp ke pe c_avePe etotal cpuremain press
 thermo 1
 thermo_modify norm yes
 
@@ -123,7 +123,7 @@ if "${computeRdf} == 1" then &
 
 # pseudo simulation without integration or ordinary run
 if "${pseudoSim} == 1" then &
-	"rerun Data/Si/XYZData/Configs/L$LT${initTemp}N10000-13000.txt &
+	"rerun ../Silicon/Data/XYZData/Configs/L$LT${initTemp}N${nSteps}.txt &
 	dump x y z vx vy vz" &
 else &
 	"run ${nSteps}"	

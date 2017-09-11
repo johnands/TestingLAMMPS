@@ -2,6 +2,17 @@ import numpy as np
 import matplotlib.pyplot as plt
 import sys
 
+import os, sys, inspect
+currentdir = os.path.dirname(os.path.abspath(inspect.getfile(inspect.currentframe())))
+parentdir = os.path.dirname(currentdir)
+grandParentDir = os.path.dirname(parentdir)
+gGrandParentDir = os.path.dirname(grandParentDir)
+sys.path.insert(0, parentdir) 
+sys.path.insert(1, grandParentDir)
+sys.path.insert(2, gGrandParentDir)
+
+import TensorFlow.Tools.matplotlibParameters as pltParams
+
 
 def readRadialdist(filename):
 
@@ -54,9 +65,14 @@ def singleDistCompare(fileTarget, fileNN):
     binCenters = (bins[1:] + bins[:-1]) / 2.0
     
     # plot first distribution
-    plt.plot(binCenters, distribution, 'b-', binCenters, distNN, 'g-')
-    plt.legend(['Target', 'NN'])
-    plt.show()
+    cut = 275
+    plt.plot(binCenters[cut:], distribution[cut:], 'k--', binCenters[cut:], distNN[cut:], 'g-')
+    plt.legend(['SW', 'NN'], prop={'size':18})
+    plt.xlabel(r'$r \; [\mathrm{\AA{}}]$')
+    plt.ylabel(r'$g(r)$')
+    plt.tight_layout()
+    #plt.savefig('../../Oppgaven/Figures/Results/radialDist.pdf')
+    #plt.show()
     
     
     
@@ -87,7 +103,7 @@ def timeDist(filename, write=False):
 
     # plot time-averaged distribution
     plt.plot(binCenters, timeAveragedDist)
-    plt.legend(['Time-averaged distribution'])
+    plt.legend(['Radial distribution function'])
     plt.show()
     
     
