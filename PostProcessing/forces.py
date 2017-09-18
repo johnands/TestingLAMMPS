@@ -295,10 +295,10 @@ class AnalyzeForces:
                 errorVsForce.append(np.sqrt(np.sum(squareError[interval])/len(interval)))
             plt.figure()
             plt.plot(binCenters, errorVsForce, 'bo--')
-            plt.xlabel(r'$|F_{\mathrm{NN}}| \; [\mathrm{eV/\AA{}}]$')
+            plt.xlabel(r'$F_{\mathrm{NN}} \; [\mathrm{eV/\AA{}}]$')
             plt.ylabel('RMSE')
             plt.tight_layout()
-            #plt.savefig('../../Oppgaven/Figures/Results/SiForces.pdf')
+            plt.savefig('../../Oppgaven/Figures/Results/SiForces.pdf')
             plt.draw()
             raw_input('Press to continue: ')
             
