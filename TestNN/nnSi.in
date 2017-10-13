@@ -11,7 +11,7 @@ variable writeRestart equal 0
 variable computeRdf equal 0
 variable nBins equal 500
 
-variable L equal 3
+variable L equal 5
 variable initTemp equal 300
 variable nSteps equal 3000
 

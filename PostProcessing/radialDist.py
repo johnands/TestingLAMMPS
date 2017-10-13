@@ -72,7 +72,7 @@ def singleDistCompare(fileTarget, fileNN):
     plt.ylabel(r'$g(r)$')
     plt.tight_layout()
     #plt.savefig('../../Oppgaven/Figures/Results/radialDist.pdf')
-    #plt.show()
+    plt.show()
     
     
     
